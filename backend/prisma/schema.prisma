@@ -1,0 +1,211 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  BUYER
+  SELLER
+  AGENT
+  ADMIN_HEAD
+  ADMIN_CO_HEAD
+}
+
+enum PropertyApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum InquiryStatus {
+  OPEN
+  CLOSED
+}
+
+enum AppointmentStatus {
+  REQUESTED
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+}
+
+model User {
+  id                 String             @id @default(cuid())
+  name               String
+  email              String             @unique
+  password           String
+  role               Role               @default(BUYER)
+  phone              String?
+  isActive           Boolean            @default(true)
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+
+  agentProfile       AgentProfile?
+  properties         Property[]         @relation("SellerProperties")
+  approvedProperties Property[]         @relation("AdminApprovedProperties")
+  inquiries          Inquiry[]          @relation("UserInquiries")
+  favorites          Favorite[]
+  buyerAppointments  Appointment[]      @relation("BuyerAppointments")
+  agentAppointments  Appointment[]      @relation("AgentAppointments")
+  blogs              Blog[]
+  adminPermissions   AdminPermission[]
+}
+
+model AgentProfile {
+  id                String    @id @default(cuid())
+  userId            String    @unique
+  agencyName        String?
+  licenseNumber     String?
+  bio               String?
+  yearsOfExperience Int?
+  rating            Float?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  properties        Property[]
+}
+
+model Property {
+  id              String                 @id @default(cuid())
+  title           String
+  description     String
+  type            String?
+  purpose         String?
+  price           Float
+  bedrooms        Int?
+  bathrooms       Int?
+  area            Float?
+  address         String
+  city            String
+  state           String?
+  country         String?
+  zipCode         String?
+  approvalStatus  PropertyApprovalStatus @default(PENDING)
+  rejectionReason String?
+  isPublished     Boolean                @default(false)
+  ownerId         String
+  agentId         String?
+  approvedById    String?
+  approvedAt      DateTime?
+  createdAt       DateTime               @default(now())
+  updatedAt       DateTime               @updatedAt
+
+  owner           User                   @relation("SellerProperties", fields: [ownerId], references: [id], onDelete: Cascade)
+  agent           AgentProfile?          @relation(fields: [agentId], references: [id], onDelete: SetNull)
+  approvedBy      User?                  @relation("AdminApprovedProperties", fields: [approvedById], references: [id], onDelete: SetNull)
+  images          PropertyImage[]
+  inquiries       Inquiry[]
+  favorites       Favorite[]
+  appointments    Appointment[]
+
+  @@index([city])
+  @@index([price])
+  @@index([approvalStatus, isPublished])
+  @@index([ownerId])
+  @@index([agentId])
+}
+
+model PropertyImage {
+  id         String   @id @default(cuid())
+  propertyId String
+  url        String
+  isPrimary  Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@index([propertyId])
+}
+
+model Inquiry {
+  id         String        @id @default(cuid())
+  propertyId String
+  userId     String
+  message    String
+  status     InquiryStatus @default(OPEN)
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+
+  property   Property      @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  user       User          @relation("UserInquiries", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([propertyId])
+  @@index([userId])
+  @@index([status])
+}
+
+model Favorite {
+  id         String   @id @default(cuid())
+  userId     String
+  propertyId String
+  createdAt  DateTime @default(now())
+
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, propertyId])
+  @@index([userId])
+  @@index([propertyId])
+}
+
+model Appointment {
+  id         String            @id @default(cuid())
+  propertyId String
+  buyerId    String
+  agentId    String?
+  dateTime   DateTime
+  note       String?
+  status     AppointmentStatus @default(REQUESTED)
+  createdAt  DateTime          @default(now())
+  updatedAt  DateTime          @updatedAt
+
+  property   Property          @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  buyer      User              @relation("BuyerAppointments", fields: [buyerId], references: [id], onDelete: Cascade)
+  agent      User?             @relation("AgentAppointments", fields: [agentId], references: [id], onDelete: SetNull)
+
+  @@index([propertyId])
+  @@index([buyerId])
+  @@index([agentId])
+  @@index([dateTime])
+}
+
+model Blog {
+  id         String   @id @default(cuid())
+  title      String
+  slug       String   @unique
+  content    String
+  published  Boolean  @default(false)
+  authorId   String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  author     User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@index([authorId])
+  @@index([published])
+}
+
+model Subscription {
+  id         String   @id @default(cuid())
+  email      String   @unique
+  isActive   Boolean  @default(true)
+  createdAt  DateTime @default(now())
+
+  @@index([isActive])
+}
+
+model AdminPermission {
+  id                 String   @id @default(cuid())
+  userId             String   @unique
+  canApproveListings Boolean  @default(true)
+  canManageUsers     Boolean  @default(false)
+  canManageBlogs     Boolean  @default(false)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  user               User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
