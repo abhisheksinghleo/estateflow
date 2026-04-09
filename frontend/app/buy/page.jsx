@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import PropertyCard from "@/components/PropertyCard";
 import PropertyFilters from "@/components/PropertyFilters";
@@ -69,6 +69,14 @@ function applyFilters(list, filters) {
 }
 
 export default function BuyPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-surface" />}>
+      <BuyPageContent />
+    </Suspense>
+  );
+}
+
+function BuyPageContent() {
   const [sort, setSort] = useState("recommended");
   const [activeFilters, setActiveFilters] = useState(null);
   const searchParams = useSearchParams();
