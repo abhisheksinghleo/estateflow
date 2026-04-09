@@ -43,13 +43,13 @@ export default function InquiryForm({ propertyId = "", onSubmitted }) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="card space-y-4 p-5 sm:p-6">
+    <form onSubmit={handleSubmit} className="rounded-2xl bg-surface-container-lowest p-5 shadow-ambient space-y-4 sm:p-6">
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold text-slate-900">
+        <h3 className="font-display text-title-lg text-on-surface">
           Send an Inquiry
         </h3>
         {propertyId ? (
-          <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-medium text-blue-700">
+          <span className="rounded-full bg-secondary-container px-3 py-1 text-label-sm font-medium text-primary">
             Property #{propertyId}
           </span>
         ) : null}
@@ -87,17 +87,17 @@ export default function InquiryForm({ propertyId = "", onSubmitted }) {
         name="message"
         value={formData.message}
         onChange={handleChange}
-        placeholder="I’m interested in this property. Please share more details."
+        placeholder="I'm interested in this property. Please share more details."
         required
       />
 
-      <label className="flex items-start gap-3 text-sm text-slate-600">
+      <label className="flex items-start gap-3 text-body-sm text-on-surface-variant">
         <input
           type="checkbox"
           name="agreeToContact"
           checked={formData.agreeToContact}
           onChange={handleChange}
-          className="mt-1 h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+          className="mt-1 h-4 w-4 rounded accent-primary"
           required
         />
         <span>
@@ -112,7 +112,7 @@ export default function InquiryForm({ propertyId = "", onSubmitted }) {
 
       {status.message ? (
         <p
-          className={`text-sm ${status.type === "success" ? "text-emerald-700" : "text-rose-700"}`}
+          className={`text-body-sm ${status.type === "success" ? "text-emerald-700" : "text-rose-700"}`}
         >
           {status.message}
         </p>

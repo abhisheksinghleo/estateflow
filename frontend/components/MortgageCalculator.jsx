@@ -66,15 +66,15 @@ export default function MortgageCalculator() {
   ]);
 
   return (
-    <section className="card p-6 md:p-8">
+    <section className="rounded-2xl bg-surface-container-lowest p-6 shadow-ambient md:p-8">
       <div className="mb-6">
-        <h2 className="text-2xl font-bold text-slate-900">
+        <h2 className="font-display text-headline-sm text-on-surface">
           Mortgage Calculator
         </h2>
-        <p className="mt-1 text-sm text-slate-600">
+        <p className="mt-1 text-body-sm text-on-surface-variant">
           Estimate your monthly payment. Great for quick planning during search.
         </p>
-        <p className="mt-2 text-xs text-slate-500">
+        <p className="mt-2 text-label-sm text-outline">
           TODO: Replace local calculations with backend finance APIs for taxes,
           PMI, and region-specific rules.
         </p>
@@ -148,12 +148,13 @@ export default function MortgageCalculator() {
           />
         </div>
 
-        <div className="rounded-xl border border-slate-200 bg-slate-50 p-5">
-          <h3 className="text-lg font-semibold text-slate-900">
+        {/* Results panel — tonal surface shift instead of border */}
+        <div className="rounded-xl bg-surface-container-low p-5">
+          <h3 className="font-display text-title-md text-on-surface">
             Estimated Monthly Breakdown
           </h3>
 
-          <dl className="mt-4 space-y-3 text-sm">
+          <dl className="mt-4 space-y-3 text-body-sm">
             <SummaryRow
               label="Loan Amount"
               value={formatCurrency(results.principal)}
@@ -176,23 +177,24 @@ export default function MortgageCalculator() {
             />
           </dl>
 
-          <div className="my-4 h-px bg-slate-200" />
+          {/* Tonal bg shift divider — no 1px border per No-Line rule */}
+          <div className="my-4 h-1 rounded-full bg-surface-container" />
 
           <div className="flex items-end justify-between">
             <div>
-              <p className="text-sm text-slate-600">Estimated Monthly Payment</p>
-              <p className="text-2xl font-bold text-blue-700">
+              <p className="text-body-sm text-on-surface-variant">Estimated Monthly Payment</p>
+              <p className="font-display text-headline-sm text-primary">
                 {formatCurrency(results.totalMonthly)}
               </p>
             </div>
-            <span className="rounded-full bg-blue-100 px-3 py-1 text-xs font-medium text-blue-700">
+            <span className="rounded-full bg-secondary-container px-3 py-1 text-label-sm font-medium text-primary">
               Mock estimate
             </span>
           </div>
 
-          <p className="mt-4 text-xs text-slate-500">
+          <p className="mt-4 text-label-sm text-outline">
             Total interest over {loanTerm} years:{" "}
-            <span className="font-medium text-slate-700">
+            <span className="font-medium text-on-surface">
               {formatCurrency(results.totalInterestPaid)}
             </span>
           </p>
@@ -215,12 +217,12 @@ function InputRow({
 }) {
   return (
     <label htmlFor={id} className="block">
-      <span className="mb-1 block text-sm font-medium text-slate-700">
+      <span className="mb-1 block text-label-sm font-medium text-on-surface">
         {label}
       </span>
       <div className="relative">
         {prefix ? (
-          <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">
+          <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-outline">
             {prefix}
           </span>
         ) : null}
@@ -235,7 +237,7 @@ function InputRow({
           className={`input-base ${prefix ? "pl-8" : ""} ${suffix ? "pr-8" : ""}`}
         />
         {suffix ? (
-          <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-500">
+          <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-outline">
             {suffix}
           </span>
         ) : null}
@@ -247,8 +249,8 @@ function InputRow({
 function SummaryRow({ label, value }) {
   return (
     <div className="flex items-center justify-between">
-      <dt className="text-slate-600">{label}</dt>
-      <dd className="font-medium text-slate-900">{value}</dd>
+      <dt className="text-on-surface-variant">{label}</dt>
+      <dd className="font-medium text-on-surface">{value}</dd>
     </div>
   );
 }

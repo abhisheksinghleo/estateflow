@@ -4,6 +4,7 @@ import { useState } from "react";
 import PropertyCard from "@/components/PropertyCard";
 import PropertyFilters from "@/components/PropertyFilters";
 import SearchBar from "@/components/SearchBar";
+import FadeIn from "@/components/animations/FadeIn";
 import { properties } from "@/lib/mockData";
 
 const rentProperties = properties.filter(
@@ -53,95 +54,106 @@ export default function RentPage() {
     : sorted;
 
   return (
-    <section className="space-y-8">
-      <header className="rounded-2xl bg-gradient-to-r from-indigo-700 to-blue-700 px-6 py-10 text-white shadow-sm sm:px-8">
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-indigo-100">
-          Rental Marketplace
-        </p>
-        <h1 className="mt-2 text-3xl font-bold sm:text-4xl">
-          Find Your Next Rental
-        </h1>
-        <p className="mt-3 max-w-2xl text-sm text-indigo-100 sm:text-base">
-          Explore verified rentals, compare amenities, and connect with agents
-          in minutes.
-        </p>
+    <section className="min-h-screen bg-surface">
+      {/* Editorial Hero Header */}
+      <header className="relative overflow-hidden bg-on-surface px-6 py-16 text-white sm:px-8">
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/30 via-on-surface/80 to-on-surface" />
+        <div className="relative z-10 mx-auto max-w-7xl">
+          <FadeIn>
+            <span className="text-label-sm font-semibold uppercase tracking-widest text-primary-container">
+              Rental Marketplace
+            </span>
+            <h1 className="mt-3 font-display text-display-md">
+              Find Your Next Rental
+            </h1>
+            <p className="mt-4 max-w-2xl text-body-lg text-white/70 font-light">
+              Explore verified rentals, compare amenities, and connect with agents
+              in minutes.
+            </p>
+          </FadeIn>
+        </div>
       </header>
 
-      <SearchBar
-        defaultValues={{
-          purpose: "rent",
-          location: "",
-          type: "Any",
-          minPrice: "",
-          maxPrice: "",
-          beds: "",
-        }}
-      />
+      <div className="mx-auto max-w-7xl px-6 lg:px-8 -mt-6 relative z-10">
+        <SearchBar
+          defaultValues={{
+            purpose: "rent",
+            location: "",
+            type: "Any",
+            minPrice: "",
+            maxPrice: "",
+            beds: "",
+          }}
+        />
+      </div>
 
-      <div className="grid gap-6 lg:grid-cols-12">
-        <div className="lg:col-span-4 xl:col-span-3">
-          <PropertyFilters onApply={handleApply} onReset={handleReset} />
-        </div>
-
-        <div className="space-y-4 lg:col-span-8 xl:col-span-9">
-          <div className="flex flex-col gap-2 rounded-xl border border-slate-200 bg-white px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-sm text-slate-600">
-              Showing{" "}
-              <span className="font-semibold text-slate-900">
-                {filtered.length}
-              </span>{" "}
-              rental listing{filtered.length !== 1 ? "s" : ""}
-            </p>
-            <select
-              className="input-base max-w-xs"
-              value={sort}
-              aria-label="Sort rentals"
-              onChange={(e) => setSort(e.target.value)}
-            >
-              <option value="newest">Newest</option>
-              <option value="priceLowHigh">Price: Low to High</option>
-              <option value="priceHighLow">Price: High to Low</option>
-              <option value="beds">Most Bedrooms</option>
-            </select>
+      <div className="mx-auto max-w-7xl px-6 lg:px-8 py-10">
+        <div className="grid gap-6 lg:grid-cols-12">
+          <div className="lg:col-span-4 xl:col-span-3">
+            <PropertyFilters onApply={handleApply} onReset={handleReset} />
           </div>
 
-          {filtered.length > 0 ? (
-            <div className="grid gap-5 sm:grid-cols-2">
-              {filtered.map((property) => (
-                <PropertyCard
-                  key={property.id}
-                  property={{
-                    id: property.id,
-                    slug: property.slug,
-                    title: property.title,
-                    location: `${property.city}, ${property.state}`,
-                    price: property.price,
-                    beds: property.beds,
-                    baths: property.baths,
-                    area: property.areaSqFt,
-                    image: property.image,
-                    type: "For Rent",
-                    featured: property.featured,
-                  }}
-                />
-              ))}
-            </div>
-          ) : (
-            <div className="rounded-xl border border-dashed border-slate-300 bg-white p-10 text-center">
-              <h2 className="text-lg font-semibold text-slate-900">
-                No rentals found
-              </h2>
-              <p className="mt-2 text-sm text-slate-600">
-                Try adjusting your filters or search criteria.
+          <div className="space-y-4 lg:col-span-8 xl:col-span-9">
+            {/* Toolbar — tonal surface shift, no border */}
+            <div className="flex flex-col gap-2 rounded-xl bg-surface-container-lowest px-4 py-3 shadow-ambient sm:flex-row sm:items-center sm:justify-between">
+              <p className="text-body-sm text-on-surface-variant">
+                Showing{" "}
+                <span className="font-semibold text-on-surface">
+                  {filtered.length}
+                </span>{" "}
+                rental listing{filtered.length !== 1 ? "s" : ""}
               </p>
-              <button
-                onClick={handleReset}
-                className="btn-primary mt-4 text-sm"
+              <select
+                className="input-base max-w-xs"
+                value={sort}
+                aria-label="Sort rentals"
+                onChange={(e) => setSort(e.target.value)}
               >
-                Clear filters
-              </button>
+                <option value="newest">Newest</option>
+                <option value="priceLowHigh">Price: Low to High</option>
+                <option value="priceHighLow">Price: High to Low</option>
+                <option value="beds">Most Bedrooms</option>
+              </select>
             </div>
-          )}
+
+            {filtered.length > 0 ? (
+              <div className="grid gap-5 sm:grid-cols-2">
+                {filtered.map((property) => (
+                  <PropertyCard
+                    key={property.id}
+                    property={{
+                      id: property.id,
+                      slug: property.slug,
+                      title: property.title,
+                      location: `${property.city}, ${property.state}`,
+                      price: property.price,
+                      beds: property.beds,
+                      baths: property.baths,
+                      area: property.areaSqFt,
+                      image: property.image,
+                      type: "For Rent",
+                      featured: property.featured,
+                    }}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="rounded-2xl bg-surface-container-low p-10 text-center">
+                <h2 className="font-display text-title-lg text-on-surface">
+                  No rentals found
+                </h2>
+                <p className="mt-2 text-body-sm text-on-surface-variant">
+                  Try adjusting your filters or search criteria.
+                </p>
+                <button
+                  onClick={handleReset}
+                  className="btn-primary mt-4 text-sm"
+                >
+                  Clear filters
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </section>
