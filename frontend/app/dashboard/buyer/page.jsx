@@ -1,4 +1,8 @@
+"use client";
+
 import Link from "next/link";
+import FadeIn from "@/components/animations/FadeIn";
+import { StaggerContainer, StaggerItem } from "@/components/animations/StaggerReveal";
 
 const savedSearches = [
   {
@@ -45,24 +49,18 @@ const recentInquiries = [
   },
 ];
 
-export const metadata = {
-  title: "Buyer Dashboard | EstateFlow",
-  description:
-    "Overview of buyer activity, saved searches, and property inquiries.",
-};
-
 function StatCard({ label, value, highlight = false }) {
   return (
     <article
-      className={`rounded-2xl border p-4 ${
-        highlight ? "border-blue-200 bg-blue-50" : "border-slate-200 bg-white"
+      className={`rounded-2xl p-5 shadow-ambient transition-all duration-300 hover:shadow-ambient-lg hover:-translate-y-1 ${
+        highlight ? "bg-primary-fixed" : "bg-surface-container-lowest"
       }`}
     >
-      <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
+      <p className="text-label-sm font-medium uppercase tracking-widest text-on-surface-variant">
         {label}
       </p>
       <p
-        className={`mt-2 text-2xl font-bold ${highlight ? "text-blue-700" : "text-slate-900"}`}
+        className={`mt-2 font-display text-headline-md ${highlight ? "text-primary" : "text-on-surface"}`}
       >
         {value}
       </p>
@@ -78,95 +76,103 @@ export default function BuyerDashboardPage() {
   const activeInquiries = recentInquiries.length;
 
   return (
-    <section className="space-y-8">
-      <header className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
-        <p className="text-sm font-medium uppercase tracking-wide text-blue-600">
-          Buyer Dashboard
-        </p>
-        <h1 className="mt-1 text-2xl font-bold text-slate-900 sm:text-3xl">
-          Welcome back, Alex 👋
-        </h1>
-        <p className="mt-2 text-sm text-slate-600">
-          Track your property search progress, review inquiries, and act quickly
-          on new matches.
-        </p>
+    <section className="min-h-screen bg-surface">
+      <div className="mx-auto max-w-7xl px-6 lg:px-8 py-10 space-y-8">
+        <FadeIn>
+          <header className="rounded-2xl bg-surface-container-lowest p-6 shadow-ambient sm:p-8">
+            <span className="text-label-sm font-semibold uppercase tracking-widest text-primary">
+              Buyer Dashboard
+            </span>
+            <h1 className="mt-2 font-display text-headline-lg text-on-surface">
+              Welcome back, Alex 👋
+            </h1>
+            <p className="mt-2 text-body-md text-on-surface-variant">
+              Track your property search progress, review inquiries, and act quickly
+              on new matches.
+            </p>
 
-        <div className="mt-5 flex flex-wrap gap-3">
-          <Link href="/buy" className="btn-primary text-sm">
-            Browse Properties
-          </Link>
-          <Link href="/contact" className="btn-secondary text-sm">
-            Contact an Agent
-          </Link>
-        </div>
-      </header>
+            <div className="mt-5 flex flex-wrap gap-3">
+              <Link href="/buy" className="btn-primary text-sm">
+                Browse Properties
+              </Link>
+              <Link href="/contact" className="btn-secondary text-sm">
+                Contact an Agent
+              </Link>
+            </div>
+          </header>
+        </FadeIn>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard label="Saved Searches" value={savedSearches.length} />
-        <StatCard label="New Matches" value={totalNewMatches} highlight />
-        <StatCard label="Active Inquiries" value={activeInquiries} />
-        <StatCard label="Upcoming Viewings" value={1} />
-      </div>
+        <StaggerContainer className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <StaggerItem><StatCard label="Saved Searches" value={savedSearches.length} /></StaggerItem>
+          <StaggerItem><StatCard label="New Matches" value={totalNewMatches} highlight /></StaggerItem>
+          <StaggerItem><StatCard label="Active Inquiries" value={activeInquiries} /></StaggerItem>
+          <StaggerItem><StatCard label="Upcoming Viewings" value={1} /></StaggerItem>
+        </StaggerContainer>
 
-      <div className="grid gap-6 lg:grid-cols-2">
-        <div className="card p-5 sm:p-6">
-          <h2 className="text-lg font-semibold text-slate-900">
-            Saved Searches
-          </h2>
-          <p className="mt-1 text-sm text-slate-600">
-            Your latest filters and fresh listing matches.
-          </p>
+        <div className="grid gap-6 lg:grid-cols-2">
+          <FadeIn direction="left">
+            <div className="rounded-2xl bg-surface-container-lowest p-5 shadow-ambient sm:p-6">
+              <h2 className="font-display text-title-lg text-on-surface">
+                Saved Searches
+              </h2>
+              <p className="mt-1 text-body-sm text-on-surface-variant">
+                Your latest filters and fresh listing matches.
+              </p>
 
-          <ul className="mt-4 space-y-3">
-            {savedSearches.map((search) => (
-              <li
-                key={search.id}
-                className="rounded-xl border border-slate-200 bg-slate-50 p-4"
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <p className="font-medium text-slate-900">{search.name}</p>
-                    <p className="mt-1 text-xs text-slate-600">
-                      {search.filters}
-                    </p>
-                    <p className="mt-2 text-xs text-slate-500">
-                      Last checked: {search.lastRun}
-                    </p>
-                  </div>
-                  <span className="rounded-full bg-blue-100 px-2.5 py-1 text-xs font-semibold text-blue-700">
-                    +{search.newMatches} new
-                  </span>
-                </div>
-              </li>
-            ))}
-          </ul>
-        </div>
+              <ul className="mt-4 space-y-3">
+                {savedSearches.map((search) => (
+                  <li
+                    key={search.id}
+                    className="rounded-xl bg-surface-container-low p-4"
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <p className="font-medium text-on-surface">{search.name}</p>
+                        <p className="mt-1 text-label-sm text-on-surface-variant">
+                          {search.filters}
+                        </p>
+                        <p className="mt-2 text-label-sm text-outline">
+                          Last checked: {search.lastRun}
+                        </p>
+                      </div>
+                      <span className="rounded-full bg-secondary-container px-2.5 py-1 text-label-sm font-semibold text-primary">
+                        +{search.newMatches} new
+                      </span>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </FadeIn>
 
-        <div className="card p-5 sm:p-6">
-          <h2 className="text-lg font-semibold text-slate-900">
-            Recent Inquiries
-          </h2>
-          <p className="mt-1 text-sm text-slate-600">
-            Status updates from your conversations with agents.
-          </p>
+          <FadeIn direction="right" delay={0.1}>
+            <div className="rounded-2xl bg-surface-container-lowest p-5 shadow-ambient sm:p-6">
+              <h2 className="font-display text-title-lg text-on-surface">
+                Recent Inquiries
+              </h2>
+              <p className="mt-1 text-body-sm text-on-surface-variant">
+                Status updates from your conversations with agents.
+              </p>
 
-          <ul className="mt-4 space-y-3">
-            {recentInquiries.map((inq) => (
-              <li
-                key={inq.id}
-                className="rounded-xl border border-slate-200 bg-white p-4"
-              >
-                <p className="font-medium text-slate-900">{inq.property}</p>
-                <p className="mt-1 text-sm text-slate-600">{inq.status}</p>
-                <p className="mt-2 text-xs text-slate-500">{inq.date}</p>
-              </li>
-            ))}
-          </ul>
+              <ul className="mt-4 space-y-3">
+                {recentInquiries.map((inq) => (
+                  <li
+                    key={inq.id}
+                    className="rounded-xl bg-surface-container-lowest p-4 shadow-ambient"
+                  >
+                    <p className="font-medium text-on-surface">{inq.property}</p>
+                    <p className="mt-1 text-body-sm text-on-surface-variant">{inq.status}</p>
+                    <p className="mt-2 text-label-sm text-outline">{inq.date}</p>
+                  </li>
+                ))}
+              </ul>
 
-          <p className="mt-4 text-xs text-slate-500">
-            TODO: Connect inquiry timeline to real API data and realtime
-            notifications.
-          </p>
+              <p className="mt-4 text-label-sm text-outline">
+                TODO: Connect inquiry timeline to real API data and realtime
+                notifications.
+              </p>
+            </div>
+          </FadeIn>
         </div>
       </div>
     </section>

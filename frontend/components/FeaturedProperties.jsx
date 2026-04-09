@@ -3,48 +3,22 @@
 import Link from "next/link";
 import PropertyCard from "@/components/PropertyCard";
 import { StaggerContainer, StaggerItem } from "@/components/animations/StaggerReveal";
+import { featuredProperties as rawFeatured } from "@/lib/mockData";
 
-const featuredProperties = [
-  {
-    id: "fp-1",
-    slug: "modern-family-home-austin",
-    title: "Modern Family Home",
-    city: "Austin, TX",
-    price: 620000,
-    beds: 4,
-    baths: 3,
-    area: 2450,
-    image: "https://images.unsplash.com/photo-1568605114967-8130f3a36994?auto=format&fit=crop&w=1200&q=80",
-    type: "Sale",
-    featured: true,
-  },
-  {
-    id: "fp-2",
-    slug: "downtown-luxury-apartment-nyc",
-    title: "Downtown Luxury Apartment",
-    city: "New York, NY",
-    price: 4200,
-    beds: 2,
-    baths: 2,
-    area: 1050,
-    image: "https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=1200&q=80",
-    type: "Rent",
-    featured: true,
-  },
-  {
-    id: "fp-3",
-    slug: "coastal-villa-miami",
-    title: "Coastal Villa",
-    city: "Miami, FL",
-    price: 1450000,
-    beds: 5,
-    baths: 4,
-    area: 3900,
-    image: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80",
-    type: "Sale",
-    featured: true,
-  },
-];
+// Map mockData shape → PropertyCard shape so slugs are always in sync
+const featuredProperties = rawFeatured.map((p) => ({
+  id: p.id,
+  slug: p.slug,
+  title: p.title,
+  city: `${p.city}, ${p.state}`,
+  price: p.price,
+  beds: p.beds,
+  baths: p.baths,
+  area: p.areaSqFt,
+  image: p.image,
+  type: p.listingType === "rent" ? "Rent" : "Sale",
+  featured: p.featured,
+}));
 
 export default function FeaturedProperties({ hideTitle = false }) {
   return (

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import FadeIn from "@/components/animations/FadeIn";
 
 const roles = [
   { value: "buyer", label: "Buyer" },
@@ -82,109 +83,111 @@ export default function RegisterPage() {
   };
 
   return (
-    <section className="mx-auto max-w-lg py-8">
-      <div className="card p-6 sm:p-8">
-        <h1 className="text-2xl font-bold text-slate-900">
-          Create your account
-        </h1>
-        <p className="mt-2 text-sm text-slate-600">
-          Join EstateFlow to save properties, track inquiries, and manage your
-          real estate journey.
-        </p>
+    <section className="mx-auto max-w-lg py-8 px-6">
+      <FadeIn>
+        <div className="rounded-2xl bg-surface-container-lowest p-6 shadow-ambient sm:p-8">
+          <h1 className="font-display text-headline-sm text-on-surface">
+            Create your account
+          </h1>
+          <p className="mt-2 text-body-sm text-on-surface-variant">
+            Join EstateFlow to save properties, track inquiries, and manage your
+            real estate journey.
+          </p>
 
-        <form onSubmit={handleSubmit} className="mt-6 space-y-4">
-          <input
-            className="input-base"
-            type="text"
-            name="fullName"
-            placeholder="Full name"
-            value={formData.fullName}
-            onChange={handleChange}
-            required
-          />
-          <input
-            className="input-base"
-            type="email"
-            name="email"
-            placeholder="Email address"
-            value={formData.email}
-            onChange={handleChange}
-            required
-          />
-          <input
-            className="input-base"
-            type="tel"
-            name="phone"
-            placeholder="Phone number"
-            value={formData.phone}
-            onChange={handleChange}
-            required
-          />
-          <select
-            className="input-base"
-            name="role"
-            value={formData.role}
-            onChange={handleChange}
-          >
-            {roles.map((role) => (
-              <option key={role.value} value={role.value}>
-                I am a {role.label}
-              </option>
-            ))}
-          </select>
-          <input
-            className="input-base"
-            type="password"
-            name="password"
-            placeholder="Password (min 8 characters)"
-            value={formData.password}
-            onChange={handleChange}
-            required
-          />
-          <input
-            className="input-base"
-            type="password"
-            name="confirmPassword"
-            placeholder="Confirm password"
-            value={formData.confirmPassword}
-            onChange={handleChange}
-            required
-          />
-
-          <label className="flex items-start gap-3 text-sm text-slate-600">
+          <form onSubmit={handleSubmit} className="mt-6 space-y-4">
             <input
-              type="checkbox"
-              name="agreeToTerms"
-              checked={formData.agreeToTerms}
+              className="input-base"
+              type="text"
+              name="fullName"
+              placeholder="Full name"
+              value={formData.fullName}
               onChange={handleChange}
-              className="mt-1 h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+              required
             />
-            <span>I agree to the Terms of Service and Privacy Policy.</span>
-          </label>
-
-          <button type="submit" className="btn-primary w-full">
-            Create Account
-          </button>
-
-          {status.message ? (
-            <p
-              className={`text-sm ${status.type === "success" ? "text-emerald-700" : "text-rose-700"}`}
+            <input
+              className="input-base"
+              type="email"
+              name="email"
+              placeholder="Email address"
+              value={formData.email}
+              onChange={handleChange}
+              required
+            />
+            <input
+              className="input-base"
+              type="tel"
+              name="phone"
+              placeholder="Phone number"
+              value={formData.phone}
+              onChange={handleChange}
+              required
+            />
+            <select
+              className="input-base"
+              name="role"
+              value={formData.role}
+              onChange={handleChange}
             >
-              {status.message}
-            </p>
-          ) : null}
-        </form>
+              {roles.map((role) => (
+                <option key={role.value} value={role.value}>
+                  I am a {role.label}
+                </option>
+              ))}
+            </select>
+            <input
+              className="input-base"
+              type="password"
+              name="password"
+              placeholder="Password (min 8 characters)"
+              value={formData.password}
+              onChange={handleChange}
+              required
+            />
+            <input
+              className="input-base"
+              type="password"
+              name="confirmPassword"
+              placeholder="Confirm password"
+              value={formData.confirmPassword}
+              onChange={handleChange}
+              required
+            />
 
-        <p className="mt-5 text-sm text-slate-600">
-          Already have an account?{" "}
-          <Link
-            href="/auth/login"
-            className="font-medium text-blue-600 hover:text-blue-700"
-          >
-            Log in
-          </Link>
-        </p>
-      </div>
+            <label className="flex items-start gap-3 text-body-sm text-on-surface-variant">
+              <input
+                type="checkbox"
+                name="agreeToTerms"
+                checked={formData.agreeToTerms}
+                onChange={handleChange}
+                className="mt-1 h-4 w-4 rounded accent-primary"
+              />
+              <span>I agree to the Terms of Service and Privacy Policy.</span>
+            </label>
+
+            <button type="submit" className="btn-primary w-full">
+              Create Account
+            </button>
+
+            {status.message ? (
+              <p
+                className={`text-body-sm ${status.type === "success" ? "text-emerald-700" : "text-rose-700"}`}
+              >
+                {status.message}
+              </p>
+            ) : null}
+          </form>
+
+          <p className="mt-5 text-body-sm text-on-surface-variant">
+            Already have an account?{" "}
+            <Link
+              href="/auth/login"
+              className="font-medium text-primary hover:text-primary/80 transition-colors duration-200"
+            >
+              Log in
+            </Link>
+          </p>
+        </div>
+      </FadeIn>
     </section>
   );
 }

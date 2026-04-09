@@ -71,6 +71,28 @@ p, h1, h2, h3, h4, h5, h6 { overflow-wrap: break-word; }
   color: #7d7672;
 }
 
+/* ===== Input Base (Ghost-field variant for forms) ===== */
+.input-base {
+  width: 100%;
+  border: none;
+  border-radius: 0.75rem;
+  padding: 0.75rem 1rem;
+  background: #e9e5e1; /* surface-container-high */
+  color: #1b1c1c;
+  font-size: 0.875rem;
+  transition: background 0.2s ease, box-shadow 0.2s ease;
+}
+
+.input-base:focus {
+  outline: none;
+  background: #ffffff;
+  box-shadow: 0 0 0 2px rgba(132, 83, 51, 0.2);
+}
+
+.input-base::placeholder {
+  color: #7d7672; /* outline */
+}
+
 /* ===== Buttons ===== */
 .btn-primary {
   display: inline-flex;

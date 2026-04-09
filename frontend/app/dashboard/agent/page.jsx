@@ -1,13 +1,13 @@
-export const metadata = {
-  title: "Agent Dashboard | EstateFlow",
-  description: "Manage leads, appointments, and listing performance.",
-};
+"use client";
+
+import FadeIn from "@/components/animations/FadeIn";
+import { StaggerContainer, StaggerItem } from "@/components/animations/StaggerReveal";
 
 const leadStats = [
-  { label: "New Leads", value: 14, tone: "bg-blue-50 text-blue-700" },
-  { label: "Contacted", value: 28, tone: "bg-amber-50 text-amber-700" },
-  { label: "Qualified", value: 12, tone: "bg-emerald-50 text-emerald-700" },
-  { label: "Closed This Month", value: 5, tone: "bg-violet-50 text-violet-700" },
+  { label: "New Leads", value: 14, tone: "bg-primary-fixed text-primary" },
+  { label: "Contacted", value: 28, tone: "bg-amber-100 text-amber-700" },
+  { label: "Qualified", value: 12, tone: "bg-emerald-100 text-emerald-700" },
+  { label: "Closed This Month", value: 5, tone: "bg-violet-100 text-violet-700" },
 ];
 
 const recentLeads = [
@@ -78,132 +78,143 @@ const appointments = [
 
 function statusBadge(status) {
   const map = {
-    New: "bg-blue-100 text-blue-700",
+    New: "bg-primary-fixed text-primary",
     Contacted: "bg-amber-100 text-amber-700",
     Qualified: "bg-emerald-100 text-emerald-700",
     "Follow-up": "bg-violet-100 text-violet-700",
   };
 
-  return map[status] || "bg-slate-100 text-slate-700";
+  return map[status] || "bg-surface-container-low text-on-surface";
 }
 
 export default function AgentDashboardPage() {
   return (
-    <main className="space-y-8">
-      <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <p className="text-sm font-medium text-blue-600">Agent Workspace</p>
-            <h1 className="mt-1 text-2xl font-bold text-slate-900 sm:text-3xl">
-              Dashboard Overview
-            </h1>
-            <p className="mt-2 text-sm text-slate-600">
-              Track leads, upcoming appointments, and day-to-day activity.
-            </p>
-          </div>
-          <button className="btn-primary w-full sm:w-auto">
-            + Add New Lead
-          </button>
-        </div>
-      </section>
-
-      <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        {leadStats.map((item) => (
-          <article
-            key={item.label}
-            className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
-          >
-            <p className="text-sm text-slate-500">{item.label}</p>
-            <div className="mt-3 flex items-center justify-between">
-              <p className="text-3xl font-bold text-slate-900">{item.value}</p>
-              <span className={`rounded-full px-3 py-1 text-xs font-semibold ${item.tone}`}>
-                Live
-              </span>
+    <main className="min-h-screen bg-surface">
+      <div className="mx-auto max-w-7xl px-6 lg:px-8 py-10 space-y-8">
+        {/* Header */}
+        <FadeIn>
+          <section className="rounded-2xl bg-surface-container-lowest p-6 shadow-ambient">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <span className="text-label-sm font-semibold uppercase tracking-widest text-primary">Agent Workspace</span>
+                <h1 className="mt-2 font-display text-headline-lg text-on-surface">
+                  Dashboard Overview
+                </h1>
+                <p className="mt-2 text-body-md text-on-surface-variant">
+                  Track leads, upcoming appointments, and day-to-day activity.
+                </p>
+              </div>
+              <button className="btn-primary w-full sm:w-auto">
+                + Add New Lead
+              </button>
             </div>
-          </article>
-        ))}
-      </section>
+          </section>
+        </FadeIn>
 
-      <section className="grid gap-6 xl:grid-cols-3">
-        <article className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm xl:col-span-2">
-          <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-slate-900">Recent Leads</h2>
-            <button className="rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-100">
-              View All
-            </button>
-          </div>
+        {/* Lead Stats */}
+        <StaggerContainer className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          {leadStats.map((item) => (
+            <StaggerItem key={item.label}>
+              <article className="rounded-2xl bg-surface-container-lowest p-5 shadow-ambient transition-all duration-300 hover:shadow-ambient-lg hover:-translate-y-1">
+                <p className="text-body-sm text-on-surface-variant">{item.label}</p>
+                <div className="mt-3 flex items-center justify-between">
+                  <p className="font-display text-headline-md text-on-surface">{item.value}</p>
+                  <span className={`rounded-full px-3 py-1 text-label-sm font-semibold ${item.tone}`}>
+                    Live
+                  </span>
+                </div>
+              </article>
+            </StaggerItem>
+          ))}
+        </StaggerContainer>
 
-          <div className="overflow-x-auto">
-            <table className="min-w-full text-left text-sm">
-              <thead>
-                <tr className="border-b border-slate-200 text-slate-500">
-                  <th className="px-3 py-2 font-medium">Lead</th>
-                  <th className="px-3 py-2 font-medium">Interest</th>
-                  <th className="px-3 py-2 font-medium">Budget</th>
-                  <th className="px-3 py-2 font-medium">Source</th>
-                  <th className="px-3 py-2 font-medium">Status</th>
-                  <th className="px-3 py-2 font-medium">Last Contact</th>
-                </tr>
-              </thead>
-              <tbody>
-                {recentLeads.map((lead) => (
-                  <tr key={lead.id} className="border-b border-slate-100 align-top">
-                    <td className="px-3 py-3">
-                      <p className="font-medium text-slate-900">{lead.name}</p>
-                      <p className="text-xs text-slate-500">{lead.id}</p>
-                    </td>
-                    <td className="px-3 py-3 text-slate-700">{lead.interest}</td>
-                    <td className="px-3 py-3 text-slate-700">{lead.budget}</td>
-                    <td className="px-3 py-3 text-slate-700">{lead.source}</td>
-                    <td className="px-3 py-3">
-                      <span
-                        className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${statusBadge(
-                          lead.status
-                        )}`}
-                      >
-                        {lead.status}
-                      </span>
-                    </td>
-                    <td className="px-3 py-3 text-slate-500">{lead.lastContact}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </article>
+        {/* Main Grid: Table + Sidebar */}
+        <section className="grid gap-6 xl:grid-cols-3">
+          <FadeIn direction="left">
+            <article className="rounded-2xl bg-surface-container-lowest p-5 shadow-ambient xl:col-span-2">
+              <div className="mb-4 flex items-center justify-between">
+                <h2 className="font-display text-title-lg text-on-surface">Recent Leads</h2>
+                <button className="rounded-lg bg-surface-container-low px-3 py-1.5 text-label-sm font-medium text-on-surface hover:bg-surface-container transition-colors duration-200">
+                  View All
+                </button>
+              </div>
 
-        <aside className="space-y-6">
-          <article className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-            <h2 className="text-lg font-semibold text-slate-900">Today’s Agenda</h2>
-            <ul className="mt-4 space-y-3">
-              {appointments.map((item) => (
-                <li
-                  key={item.id}
-                  className="rounded-xl border border-slate-200 bg-slate-50 p-3"
-                >
-                  <p className="font-medium text-slate-900">{item.client}</p>
-                  <p className="text-sm text-slate-600">{item.property}</p>
-                  <p className="mt-1 text-xs text-slate-500">
-                    {item.date} • {item.time} • {item.type}
-                  </p>
-                </li>
-              ))}
-            </ul>
-          </article>
+              <div className="overflow-x-auto">
+                <table className="min-w-full text-left text-body-sm">
+                  <thead>
+                    {/* Tonal header row instead of border */}
+                    <tr className="bg-surface-container-low text-on-surface-variant">
+                      <th className="px-3 py-2 font-medium rounded-l-lg">Lead</th>
+                      <th className="px-3 py-2 font-medium">Interest</th>
+                      <th className="px-3 py-2 font-medium">Budget</th>
+                      <th className="px-3 py-2 font-medium">Source</th>
+                      <th className="px-3 py-2 font-medium">Status</th>
+                      <th className="px-3 py-2 font-medium rounded-r-lg">Last Contact</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {recentLeads.map((lead) => (
+                      <tr key={lead.id} className="align-top hover:bg-surface-container-low/50 transition-colors duration-150">
+                        <td className="px-3 py-3">
+                          <p className="font-medium text-on-surface">{lead.name}</p>
+                          <p className="text-label-sm text-outline">{lead.id}</p>
+                        </td>
+                        <td className="px-3 py-3 text-on-surface">{lead.interest}</td>
+                        <td className="px-3 py-3 text-on-surface">{lead.budget}</td>
+                        <td className="px-3 py-3 text-on-surface">{lead.source}</td>
+                        <td className="px-3 py-3">
+                          <span
+                            className={`inline-flex rounded-full px-2.5 py-1 text-label-sm font-semibold ${statusBadge(
+                              lead.status
+                            )}`}
+                          >
+                            {lead.status}
+                          </span>
+                        </td>
+                        <td className="px-3 py-3 text-outline">{lead.lastContact}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </article>
+          </FadeIn>
 
-          <article className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-            <h2 className="text-lg font-semibold text-slate-900">Quick Actions</h2>
-            <div className="mt-4 grid gap-2">
-              <button className="btn-secondary justify-center">Schedule Appointment</button>
-              <button className="btn-secondary justify-center">Send Follow-up Email</button>
-              <button className="btn-secondary justify-center">Create Property Match</button>
-            </div>
-            <p className="mt-4 text-xs text-slate-500">
-              TODO: Connect actions to CRM/workflow APIs.
-            </p>
-          </article>
-        </aside>
-      </section>
+          <FadeIn direction="right" delay={0.1}>
+            <aside className="space-y-6">
+              <article className="rounded-2xl bg-surface-container-lowest p-5 shadow-ambient">
+                <h2 className="font-display text-title-lg text-on-surface">Today&apos;s Agenda</h2>
+                <ul className="mt-4 space-y-3">
+                  {appointments.map((item) => (
+                    <li
+                      key={item.id}
+                      className="rounded-xl bg-surface-container-low p-3"
+                    >
+                      <p className="font-medium text-on-surface">{item.client}</p>
+                      <p className="text-body-sm text-on-surface-variant">{item.property}</p>
+                      <p className="mt-1 text-label-sm text-outline">
+                        {item.date} • {item.time} • {item.type}
+                      </p>
+                    </li>
+                  ))}
+                </ul>
+              </article>
+
+              <article className="rounded-2xl bg-surface-container-lowest p-5 shadow-ambient">
+                <h2 className="font-display text-title-lg text-on-surface">Quick Actions</h2>
+                <div className="mt-4 grid gap-2">
+                  <button className="btn-secondary justify-center">Schedule Appointment</button>
+                  <button className="btn-secondary justify-center">Send Follow-up Email</button>
+                  <button className="btn-secondary justify-center">Create Property Match</button>
+                </div>
+                <p className="mt-4 text-label-sm text-outline">
+                  TODO: Connect actions to CRM/workflow APIs.
+                </p>
+              </article>
+            </aside>
+          </FadeIn>
+        </section>
+      </div>
     </main>
   );
 }

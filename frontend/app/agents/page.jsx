@@ -1,4 +1,9 @@
+"use client";
+
 import Link from "next/link";
+import { motion, useReducedMotion } from "framer-motion";
+import FadeIn from "@/components/animations/FadeIn";
+import { StaggerContainer, StaggerItem } from "@/components/animations/StaggerReveal";
 
 const agents = [
   {
@@ -47,73 +52,87 @@ const agents = [
   },
 ];
 
-export const metadata = {
-  title: "Agents | EstateFlow",
-  description: "Meet our experienced real estate agents.",
-};
-
 export default function AgentsPage() {
+  const shouldReduceMotion = useReducedMotion();
+
   return (
-    <section className="min-h-screen bg-slate-50 py-6">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <header className="mb-8 rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
-          <p className="text-xs font-semibold uppercase tracking-wide text-blue-600">
-            Meet the team
-          </p>
-          <h1 className="mt-2 text-3xl font-bold text-slate-900 sm:text-4xl">
-            Real Estate Experts You Can Trust
-          </h1>
-          <p className="mt-3 max-w-3xl text-sm text-slate-600 sm:text-base">
-            Browse our mock agent directory for the MVP. Each profile includes
-            role, experience, and quick contact details.
-          </p>
-        </header>
-
-        <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
-          {agents.map((agent) => (
-            <article
-              key={agent.id}
-              className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
-            >
-              <img
-                src={agent.image}
-                alt={agent.name}
-                className="h-56 w-full object-cover"
-                loading="lazy"
-              />
-              <div className="space-y-3 p-4">
-                <div>
-                  <h2 className="text-lg font-semibold text-slate-900">
-                    {agent.name}
-                  </h2>
-                  <p className="text-sm text-slate-600">{agent.title}</p>
-                </div>
-
-                <div className="grid grid-cols-2 gap-2 rounded-xl bg-slate-50 p-3 text-center text-xs">
-                  <div>
-                    <p className="font-bold text-slate-900">
-                      {agent.experience}
-                    </p>
-                    <p className="text-slate-500">Experience</p>
-                  </div>
-                  <div>
-                    <p className="font-bold text-slate-900">{agent.rating}/5</p>
-                    <p className="text-slate-500">Rating</p>
-                  </div>
-                </div>
-
-                <p className="text-sm text-slate-700">{agent.phone}</p>
-                <p className="text-sm text-slate-700">{agent.email}</p>
-
-                <Link href="/contact" className="btn-primary w-full text-sm">
-                  Contact Agent
-                </Link>
-              </div>
-            </article>
-          ))}
+    <section className="min-h-screen bg-surface">
+      {/* Editorial Hero */}
+      <header className="relative overflow-hidden bg-on-surface px-6 py-16 text-white sm:px-10">
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/30 via-on-surface/80 to-on-surface" />
+        <div className="relative z-10 mx-auto max-w-7xl">
+          <FadeIn>
+            <span className="text-label-sm font-semibold uppercase tracking-widest text-primary-container">
+              Meet the team
+            </span>
+            <h1 className="mt-3 font-display text-display-md">
+              Real Estate Experts You Can Trust
+            </h1>
+            <p className="mt-4 max-w-3xl text-body-lg text-white/70 font-light">
+              Browse our agent directory. Each profile includes
+              role, experience, and quick contact details.
+            </p>
+          </FadeIn>
         </div>
+      </header>
 
-        <p className="mt-8 text-xs text-slate-500">
+      <div className="mx-auto max-w-7xl px-6 lg:px-8 py-14">
+        <StaggerContainer className="grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
+          {agents.map((agent) => (
+            <StaggerItem key={agent.id}>
+              <motion.article
+                className="group overflow-hidden rounded-2xl bg-surface-container-lowest shadow-ambient transition-shadow duration-300 hover:shadow-ambient-lg"
+                whileHover={
+                  shouldReduceMotion
+                    ? {}
+                    : { y: -4, transition: { type: "spring", stiffness: 300, damping: 25 } }
+                }
+              >
+                <div className="relative overflow-hidden">
+                  <motion.img
+                    src={agent.image}
+                    alt={agent.name}
+                    className="h-56 w-full object-cover"
+                    loading="lazy"
+                    whileHover={shouldReduceMotion ? {} : { scale: 1.04 }}
+                    transition={{ duration: 0.6, ease: "easeOut" }}
+                  />
+                </div>
+                <div className="space-y-3 p-5">
+                  <div>
+                    <h2 className="font-display text-title-md text-on-surface group-hover:text-primary transition-colors duration-200">
+                      {agent.name}
+                    </h2>
+                    <p className="text-body-sm text-on-surface-variant">{agent.title}</p>
+                  </div>
+
+                  {/* Stats — tonal surface shift instead of border */}
+                  <div className="grid grid-cols-2 gap-2 rounded-xl bg-surface-container-low p-3 text-center">
+                    <div>
+                      <p className="text-label-lg font-bold text-on-surface">
+                        {agent.experience}
+                      </p>
+                      <p className="text-label-sm text-on-surface-variant">Experience</p>
+                    </div>
+                    <div>
+                      <p className="text-label-lg font-bold text-on-surface">{agent.rating}/5</p>
+                      <p className="text-label-sm text-on-surface-variant">Rating</p>
+                    </div>
+                  </div>
+
+                  <p className="text-body-sm text-on-surface">{agent.phone}</p>
+                  <p className="text-body-sm text-on-surface">{agent.email}</p>
+
+                  <Link href="/contact" className="btn-primary w-full text-sm">
+                    Contact Agent
+                  </Link>
+                </div>
+              </motion.article>
+            </StaggerItem>
+          ))}
+        </StaggerContainer>
+
+        <p className="mt-8 text-label-sm text-outline">
           TODO: Replace this static list with `/agents` API data and individual
           agent profile pages.
         </p>
