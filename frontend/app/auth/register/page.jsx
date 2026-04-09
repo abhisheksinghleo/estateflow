@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import FadeIn from "@/components/animations/FadeIn";
 
@@ -11,6 +12,7 @@ const roles = [
 ];
 
 export default function RegisterPage() {
+  const router = useRouter();
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
@@ -68,8 +70,13 @@ export default function RegisterPage() {
 
     setStatus({
       type: "success",
-      message: "Registration successful. You can now log in.",
+      message: "Registration successful! Redirecting to login...",
     });
+
+    // Redirect to login after showing success message
+    setTimeout(() => {
+      router.push("/auth/login");
+    }, 1200);
 
     setFormData({
       fullName: "",

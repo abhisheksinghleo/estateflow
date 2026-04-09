@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import FadeIn from "@/components/animations/FadeIn";
 
@@ -11,6 +12,7 @@ const initialForm = {
 };
 
 export default function LoginPage() {
+  const router = useRouter();
   const [form, setForm] = useState(initialForm);
   const [status, setStatus] = useState({ type: "", message: "" });
   const [loading, setLoading] = useState(false);
@@ -39,8 +41,13 @@ export default function LoginPage() {
 
       setStatus({
         type: "success",
-        message: "Logged in successfully (mock). Redirect logic pending API integration.",
+        message: "Logged in successfully! Redirecting to dashboard...",
       });
+
+      // Redirect to dashboard after showing success message
+      setTimeout(() => {
+        router.push("/dashboard/buyer");
+      }, 1000);
     } catch (error) {
       setStatus({
         type: "error",
