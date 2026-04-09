@@ -7,25 +7,77 @@ module.exports = {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ["Inter", "ui-sans-serif", "system-ui", "-apple-system", "sans-serif"],
+        display: ["Manrope", "ui-sans-serif", "system-ui", "sans-serif"],
+      },
       colors: {
-        brand: {
-          50: "#eff6ff",
-          100: "#dbeafe",
-          200: "#bfdbfe",
-          300: "#93c5fd",
-          400: "#60a5fa",
-          500: "#3b82f6",
-          600: "#2563eb",
-          700: "#1d4ed8",
-          800: "#1e40af",
-          900: "#1e3a8a",
+        primary: {
+          DEFAULT: "#845333",
+          container: "#c68b67",
+          fixed: "#ffdbc8",
+          "fixed-variant": "#6e3d1f",
+        },
+        secondary: {
+          container: "#fdd8c5",
+        },
+        tertiary: {
+          DEFAULT: "#2b666f",
+        },
+        surface: {
+          DEFAULT: "#faf6f3",
+          "container-lowest": "#ffffff",
+          "container-low": "#f5f0ec",
+          "container": "#efebe7",
+          "container-high": "#e9e5e1",
+          "container-highest": "#e3dfdb",
+        },
+        "on-surface": {
+          DEFAULT: "#1b1c1c",
+          variant: "#4a4643",
+        },
+        "on-primary": {
+          DEFAULT: "#ffffff",
+          "fixed-variant": "#5a3018",
+        },
+        outline: {
+          DEFAULT: "#7d7672",
+          variant: "#d6c3b9",
         },
       },
-      boxShadow: {
-        soft: "0 4px 20px rgba(15, 23, 42, 0.08)",
-      },
       borderRadius: {
-        xl2: "1rem",
+        DEFAULT: "0.5rem",
+        lg: "0.75rem",
+        xl: "1rem",
+        "2xl": "1.25rem",
+        "3xl": "1.5rem",
+        full: "9999px",
+      },
+      boxShadow: {
+        ambient: "0 8px 40px rgba(27, 28, 28, 0.06)",
+        "ambient-lg": "0 16px 60px rgba(27, 28, 28, 0.08)",
+        glow: "0 0 40px rgba(132, 83, 51, 0.08)",
+      },
+      spacing: {
+        18: "4.5rem",
+        22: "5.5rem",
+      },
+      letterSpacing: {
+        display: "-0.02em",
+      },
+      fontSize: {
+        "display-lg": ["3.5rem", { lineHeight: "1.1", letterSpacing: "-0.02em", fontWeight: "700" }],
+        "display-md": ["2.75rem", { lineHeight: "1.12", letterSpacing: "-0.02em", fontWeight: "700" }],
+        "headline-lg": ["2rem", { lineHeight: "1.2", letterSpacing: "-0.02em", fontWeight: "600" }],
+        "headline-md": ["1.75rem", { lineHeight: "1.25", letterSpacing: "-0.015em", fontWeight: "600" }],
+        "title-lg": ["1.375rem", { lineHeight: "1.3", fontWeight: "600" }],
+        "title-md": ["1rem", { lineHeight: "1.4", fontWeight: "600" }],
+        "body-lg": ["1rem", { lineHeight: "1.6", fontWeight: "400" }],
+        "body-md": ["0.875rem", { lineHeight: "1.6", fontWeight: "400" }],
+        "body-sm": ["0.8125rem", { lineHeight: "1.5", fontWeight: "400" }],
+        "label-lg": ["0.875rem", { lineHeight: "1.4", fontWeight: "500" }],
+        "label-md": ["0.75rem", { lineHeight: "1.4", fontWeight: "500" }],
+        "label-sm": ["0.6875rem", { lineHeight: "1.3", fontWeight: "500" }],
       },
     },
   },
