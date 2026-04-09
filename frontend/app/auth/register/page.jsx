@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useAuth } from "@/context/AuthContext";
-import { authApi } from "@/lib/api";
 
 const roles = [
   { value: "buyer", label: "Buyer", desc: "Search and save properties" },
@@ -15,7 +14,7 @@ const roles = [
 
 export default function RegisterPage() {
   const router = useRouter();
-  const { login: authLogin, isAuthenticated, getDashboardPath, loading: authLoading } = useAuth();
+  const { register: authRegister, isAuthenticated, getDashboardPath, loading: authLoading } = useAuth();
 
   const [formData, setFormData] = useState({
     fullName: "",
@@ -70,20 +69,14 @@ export default function RegisterPage() {
     }
 
     try {
-      // Register via API
-      const { token, user } = await authApi.register({
+      // Register via Context
+      const user = await authRegister({
         name: formData.fullName,
         email: formData.email,
         phone: formData.phone,
         password: formData.password,
-        role: formData.role,
+        role: formData.role.toUpperCase(),
       });
-
-      // Store token and login via context
-      if (token) {
-        localStorage.setItem("authToken", token);
-        localStorage.setItem("authUser", JSON.stringify(user));
-      }
 
       setStatus({
         type: "success",

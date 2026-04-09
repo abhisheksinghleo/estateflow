@@ -1,19 +1,23 @@
 /** @type {import('next').NextConfig} */
 
-const isProd = process.env.NODE_ENV === "production";
-const repoName = process.env.NEXT_PUBLIC_REPO_NAME || "";
-
 const nextConfig = {
   reactStrictMode: true,
-  // "output: export" is only needed for GitHub Pages static hosting.
-  // Enabling it in dev mode breaks dynamic [slug] routes because Next.js
-  // tries to pre-render ALL params at startup — even ones not yet visited.
-  ...(isProd && { output: "export" }),
-  trailingSlash: true,
-  basePath: isProd && repoName ? `/${repoName}` : "",
-  assetPrefix: isProd && repoName ? `/${repoName}/` : "",
+  // No "output: export" — Vercel handles SSR/ISR natively.
+  // Static export was only needed for GitHub Pages; Vercel does NOT need it.
+  trailingSlash: false,
   images: {
-    unoptimized: true,
+    // Allow images from Supabase storage and Unsplash
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "images.unsplash.com",
+      },
+      {
+        protocol: "https",
+        hostname: "*.supabase.co",
+      },
+    ],
+    unoptimized: false,
   },
 };
 

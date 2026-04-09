@@ -1,33 +1,41 @@
 import PropertyDetailContent from "@/components/PropertyDetailContent";
-import { properties as mockProperties } from "@/lib/mockData";
+import { propertyApi } from "@/lib/api";
 
 /**
- * Pre-generate static params for known mock properties.
- * API-only properties (e.g. Indian listings from backend seed)
- * are rendered on-demand via dynamic routing with `dynamicParams = true`.
+ * All property slugs are now sourced from Supabase.
+ * dynamicParams = true allows on-demand rendering for any slug.
  */
 export const dynamicParams = true;
+export const revalidate = 3600; // Re-fetch static params every 1 hour
 
-export function generateStaticParams() {
-  return mockProperties.map((property) => ({ slug: property.slug }));
+export async function generateStaticParams() {
+  try {
+    const properties = await propertyApi.getProperties({});
+    return (properties || []).map((p) => ({ slug: p.slug || p.id }));
+  } catch {
+    return [];
+  }
 }
 
 export async function generateMetadata({ params }) {
-  // Check local mock first; if not found, return a generic title
-  // (the actual data is fetched client-side in PropertyDetailContent)
-  const property = mockProperties.find((p) => p.slug === params.slug);
-
-  if (!property) {
+  try {
+    const property = await propertyApi.getPropertyBySlug(params.slug);
+    if (!property) {
+      return {
+        title: "Property Details | EstateFlow",
+        description: "View property details, make offers, and connect with sellers on EstateFlow.",
+      };
+    }
+    return {
+      title: `${property.title} | EstateFlow`,
+      description: property.description,
+    };
+  } catch {
     return {
       title: "Property Details | EstateFlow",
-      description: "View property details, make offers, and connect with sellers on EstateFlow.",
+      description: "View property details on EstateFlow.",
     };
   }
-
-  return {
-    title: `${property.title} | EstateFlow`,
-    description: property.description,
-  };
 }
 
 export default function PropertyDetailsPage({ params }) {
