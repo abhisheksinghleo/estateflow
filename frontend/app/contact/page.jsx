@@ -2,21 +2,9 @@
 
 import { useState } from "react";
 import FadeIn from "@/components/animations/FadeIn";
-
-const officeLocations = [
-  {
-    city: "Austin",
-    address: "124 Greenwood Ave, Austin, TX 78704",
-    phone: "+1 (555) 120-4488",
-    email: "austin@estateflow.com",
-  },
-  {
-    city: "New York",
-    address: "88 Riverfront St, New York, NY 10019",
-    phone: "+1 (555) 889-3021",
-    email: "nyc@estateflow.com",
-  },
-];
+import Skeleton from "@/components/Skeleton";
+import { contactApi } from "@/lib/api";
+import useApi from "@/lib/useApi";
 
 const initialFormState = {
   name: "",
@@ -30,6 +18,14 @@ const initialFormState = {
 export default function ContactPage() {
   const [formData, setFormData] = useState(initialFormState);
   const [status, setStatus] = useState({ type: "", message: "" });
+  const [submitting, setSubmitting] = useState(false);
+
+  // Fetch office locations from API
+  const { data: officeLocations, loading: loadingOffices } = useApi(
+    () => contactApi.getOfficeLocations(),
+    [],
+    [],
+  );
 
   const handleChange = (event) => {
     const { name, value, type, checked } = event.target;
@@ -42,17 +38,23 @@ export default function ContactPage() {
   const handleSubmit = async (event) => {
     event.preventDefault();
     setStatus({ type: "", message: "" });
+    setSubmitting(true);
 
-    // TODO: Integrate backend API endpoint, e.g. POST /contact
-    await new Promise((resolve) => setTimeout(resolve, 700));
-
-    setStatus({
-      type: "success",
-      message:
-        "Thanks! Your message has been sent. Our team will reach out soon.",
-    });
-
-    setFormData(initialFormState);
+    try {
+      const result = await contactApi.submitContact(formData);
+      setStatus({
+        type: "success",
+        message: result.message || "Thanks! Your message has been sent. Our team will reach out soon.",
+      });
+      setFormData(initialFormState);
+    } catch (err) {
+      setStatus({
+        type: "error",
+        message: "Something went wrong. Please try again.",
+      });
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -156,8 +158,12 @@ export default function ContactPage() {
                   <span>I agree to be contacted regarding this request.</span>
                 </label>
 
-                <button type="submit" className="btn-primary w-full sm:w-auto">
-                  Submit Message
+                <button
+                  type="submit"
+                  className="btn-primary w-full sm:w-auto"
+                  disabled={submitting}
+                >
+                  {submitting ? "Sending…" : "Submit Message"}
                 </button>
 
                 {status.message ? (
@@ -176,18 +182,22 @@ export default function ContactPage() {
           </div>
 
           <aside className="space-y-4">
-            {officeLocations.map((office, i) => (
-              <FadeIn key={office.city} direction="right" delay={i * 0.15}>
-                <div className="rounded-2xl bg-surface-container-lowest p-5 shadow-ambient">
-                  <h3 className="font-display text-title-md text-on-surface">
-                    {office.city} Office
-                  </h3>
-                  <p className="mt-2 text-body-sm text-on-surface-variant">{office.address}</p>
-                  <p className="mt-2 text-body-sm text-on-surface">📞 {office.phone}</p>
-                  <p className="text-body-sm text-on-surface">✉️ {office.email}</p>
-                </div>
-              </FadeIn>
-            ))}
+            {loadingOffices ? (
+              <Skeleton variant="block" count={2} className="h-36" />
+            ) : (
+              (officeLocations || []).map((office, i) => (
+                <FadeIn key={office.city} direction="right" delay={i * 0.15}>
+                  <div className="rounded-2xl bg-surface-container-lowest p-5 shadow-ambient">
+                    <h3 className="font-display text-title-md text-on-surface">
+                      {office.city} Office
+                    </h3>
+                    <p className="mt-2 text-body-sm text-on-surface-variant">{office.address}</p>
+                    <p className="mt-2 text-body-sm text-on-surface">📞 {office.phone}</p>
+                    <p className="text-body-sm text-on-surface">✉️ {office.email}</p>
+                  </div>
+                </FadeIn>
+              ))
+            )}
           </aside>
         </div>
       </div>

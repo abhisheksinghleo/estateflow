@@ -126,7 +126,7 @@ export const properties = [
     zip: "85004",
     featured: true,
     image:
-      "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1560448075-bb485b067938?auto=format&fit=crop&w=1200&q=80",
     description:
       "Spacious newly built villa with modern architecture, pool, and home office space.",
     amenities: ["Pool", "Office", "Solar Panels", "Three-Car Garage"],

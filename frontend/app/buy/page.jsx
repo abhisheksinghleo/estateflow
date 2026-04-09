@@ -1,14 +1,14 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import PropertyCard from "@/components/PropertyCard";
 import PropertyFilters from "@/components/PropertyFilters";
 import SearchBar from "@/components/SearchBar";
+import Skeleton from "@/components/Skeleton";
 import FadeIn from "@/components/animations/FadeIn";
-import { getPropertiesByListingType } from "@/lib/mockData";
-
-const allBuyProperties = getPropertiesByListingType("buy");
+import { propertyApi } from "@/lib/api";
+import useApi from "@/lib/useApi";
 
 /* ── helper: apply any combination of filters to the property list ── */
 function applyFilters(list, filters) {
@@ -69,17 +69,16 @@ function applyFilters(list, filters) {
 }
 
 export default function BuyPage() {
-  return (
-    <Suspense fallback={<div className="min-h-screen bg-surface" />}>
-      <BuyPageContent />
-    </Suspense>
-  );
-}
-
-function BuyPageContent() {
   const [sort, setSort] = useState("recommended");
   const [activeFilters, setActiveFilters] = useState(null);
   const searchParams = useSearchParams();
+
+  // Fetch all buy properties from API
+  const { data: allBuyProperties, loading } = useApi(
+    () => propertyApi.getPropertiesByType("buy"),
+    [],
+    [],
+  );
 
   /* Read URL query params on mount (from homepage search) */
   useEffect(() => {
@@ -114,7 +113,7 @@ function BuyPageContent() {
     setActiveFilters(null);
   };
 
-  const filtered = applyFilters(allBuyProperties, activeFilters);
+  const filtered = applyFilters(allBuyProperties || [], activeFilters);
 
   const sorted = [...filtered].sort((a, b) => {
     if (sort === "price-low-high") return a.price - b.price;
@@ -169,18 +168,24 @@ function BuyPageContent() {
             {/* Toolbar — tonal surface shift, no border */}
             <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-surface-container-lowest px-4 py-3 shadow-ambient">
               <p className="text-body-sm text-on-surface-variant">
-                Showing{" "}
-                <span className="font-semibold text-on-surface">
-                  {sorted.length}
-                </span>{" "}
-                buy listing{sorted.length !== 1 ? "s" : ""}
-                {activeFilters && (
-                  <button
-                    onClick={handleReset}
-                    className="ml-3 text-label-sm font-medium text-primary hover:text-primary/80 underline transition-colors duration-200"
-                  >
-                    Clear filters
-                  </button>
+                {loading ? (
+                  <span className="text-outline">Loading listings…</span>
+                ) : (
+                  <>
+                    Showing{" "}
+                    <span className="font-semibold text-on-surface">
+                      {sorted.length}
+                    </span>{" "}
+                    buy listing{sorted.length !== 1 ? "s" : ""}
+                    {activeFilters && (
+                      <button
+                        onClick={handleReset}
+                        className="ml-3 text-label-sm font-medium text-primary hover:text-primary/80 underline transition-colors duration-200"
+                      >
+                        Clear filters
+                      </button>
+                    )}
+                  </>
                 )}
               </p>
               <select
@@ -196,7 +201,11 @@ function BuyPageContent() {
               </select>
             </div>
 
-            {sorted.length > 0 ? (
+            {loading ? (
+              <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+                <Skeleton variant="card" count={6} />
+              </div>
+            ) : sorted.length > 0 ? (
               <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
                 {sorted.map((property) => (
                   <PropertyCard
@@ -206,6 +215,8 @@ function BuyPageContent() {
                       city: `${property.city}, ${property.state}`,
                       area: property.areaSqFt,
                       type: "Sale",
+                      currency: property.currency || "USD",
+                      listedByAgent: property.listedByAgent || false,
                     }}
                   />
                 ))}

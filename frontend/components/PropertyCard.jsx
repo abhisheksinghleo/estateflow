@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
+import { formatPrice } from "@/lib/api";
 
 export default function PropertyCard({ property }) {
   const shouldReduceMotion = useReducedMotion();
@@ -12,12 +13,14 @@ export default function PropertyCard({ property }) {
     title = "Modern Family Home",
     city = "California",
     price = 0,
+    currency = "USD",
     beds = 0,
     baths = 0,
     area = 0,
     image = "https://images.unsplash.com/photo-1560185007-cde436f6a4d0?auto=format&fit=crop&w=1200&q=80",
     type = "Sale",
     featured = false,
+    listedByAgent = false,
   } = property || {};
 
   const href = `/properties/${slug || id || "sample-property"}`;
@@ -40,6 +43,11 @@ export default function PropertyCard({ property }) {
           loading="lazy"
           whileHover={shouldReduceMotion ? {} : { scale: 1.04 }}
           transition={{ duration: 0.6, ease: "easeOut" }}
+          onError={(e) => {
+            e.target.onerror = null;
+            e.target.style.background = "linear-gradient(135deg, #d4c4b0 0%, #a89279 50%, #8b7355 100%)";
+            e.target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300'%3E%3C/svg%3E";
+          }}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-[#1b1c1c]/30 via-transparent to-transparent" />
 
@@ -51,6 +59,11 @@ export default function PropertyCard({ property }) {
           {featured && (
             <span className="rounded-full bg-secondary-container px-3.5 py-1 text-label-sm font-semibold uppercase tracking-wider text-primary">
               Featured
+            </span>
+          )}
+          {listedByAgent && (
+            <span className="rounded-full bg-violet-200/90 px-3.5 py-1 text-label-sm font-semibold uppercase tracking-wider text-violet-800 backdrop-blur-sm">
+              Agent
             </span>
           )}
         </div>
@@ -70,7 +83,7 @@ export default function PropertyCard({ property }) {
       <div className="flex flex-1 flex-col justify-between p-6">
         <div>
           <p className="font-display text-title-md font-bold text-on-surface">
-            ${Number(price).toLocaleString("en-US")}
+            {formatPrice(Number(price), currency)}
             {type.toLowerCase() === "rent" && (
               <span className="text-body-sm font-normal text-on-surface-variant">/mo</span>
             )}

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { inquiryApi } from "@/lib/api";
 
 const initialFormState = {
   fullName: "",
@@ -13,6 +14,7 @@ const initialFormState = {
 export default function InquiryForm({ propertyId = "", onSubmitted }) {
   const [formData, setFormData] = useState(initialFormState);
   const [status, setStatus] = useState({ type: "", message: "" });
+  const [submitting, setSubmitting] = useState(false);
 
   const handleChange = (event) => {
     const { name, value, type, checked } = event.target;
@@ -25,21 +27,26 @@ export default function InquiryForm({ propertyId = "", onSubmitted }) {
   const handleSubmit = async (event) => {
     event.preventDefault();
     setStatus({ type: "", message: "" });
+    setSubmitting(true);
 
-    // TODO: Replace mock submit with real API integration.
-    // Suggested integration:
-    // 1) POST to /inquiries with { ...formData, propertyId }
-    // 2) Handle validation and backend errors
-    // 3) Track conversion event on success
-    await new Promise((resolve) => setTimeout(resolve, 600));
+    try {
+      const result = await inquiryApi.createInquiry({ ...formData, propertyId });
 
-    setStatus({
-      type: "success",
-      message: "Your inquiry has been sent. An agent will contact you shortly.",
-    });
+      setStatus({
+        type: "success",
+        message: result.message || "Your inquiry has been sent. An agent will contact you shortly.",
+      });
 
-    onSubmitted?.({ ...formData, propertyId });
-    setFormData(initialFormState);
+      onSubmitted?.({ ...formData, propertyId });
+      setFormData(initialFormState);
+    } catch (err) {
+      setStatus({
+        type: "error",
+        message: "Failed to send inquiry. Please try again.",
+      });
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -106,8 +113,8 @@ export default function InquiryForm({ propertyId = "", onSubmitted }) {
         </span>
       </label>
 
-      <button type="submit" className="btn-primary w-full">
-        Submit Inquiry
+      <button type="submit" className="btn-primary w-full" disabled={submitting}>
+        {submitting ? "Sending…" : "Submit Inquiry"}
       </button>
 
       {status.message ? (

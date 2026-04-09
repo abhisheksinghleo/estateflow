@@ -2,25 +2,35 @@
 
 import Link from "next/link";
 import PropertyCard from "@/components/PropertyCard";
+import Skeleton from "@/components/Skeleton";
 import { StaggerContainer, StaggerItem } from "@/components/animations/StaggerReveal";
-import { featuredProperties as rawFeatured } from "@/lib/mockData";
-
-// Map mockData shape → PropertyCard shape so slugs are always in sync
-const featuredProperties = rawFeatured.map((p) => ({
-  id: p.id,
-  slug: p.slug,
-  title: p.title,
-  city: `${p.city}, ${p.state}`,
-  price: p.price,
-  beds: p.beds,
-  baths: p.baths,
-  area: p.areaSqFt,
-  image: p.image,
-  type: p.listingType === "rent" ? "Rent" : "Sale",
-  featured: p.featured,
-}));
+import { propertyApi } from "@/lib/api";
+import useApi from "@/lib/useApi";
 
 export default function FeaturedProperties({ hideTitle = false }) {
+  const { data: rawFeatured, loading } = useApi(
+    () => propertyApi.getFeaturedProperties(),
+    [],
+    [],
+  );
+
+  // Map API/mock shape → PropertyCard shape
+  const featuredProperties = (rawFeatured || []).map((p) => ({
+    id: p.id,
+    slug: p.slug,
+    title: p.title,
+    city: p.state ? `${p.city}, ${p.state}` : p.city,
+    price: p.price,
+    currency: p.currency || "USD",
+    beds: p.beds,
+    baths: p.baths,
+    area: p.areaSqFt || p.area,
+    image: p.image,
+    type: p.listingType === "rent" ? "Rent" : "Sale",
+    featured: p.featured,
+    listedByAgent: p.listedByAgent || false,
+  }));
+
   return (
     <div className={hideTitle ? "" : "mx-auto max-w-7xl px-6 py-14 lg:px-8"}>
       {!hideTitle && (
@@ -45,13 +55,19 @@ export default function FeaturedProperties({ hideTitle = false }) {
         </div>
       )}
 
-      <StaggerContainer className="grid gap-8 md:grid-cols-2 xl:grid-cols-3">
-        {featuredProperties.map((property) => (
-          <StaggerItem key={property.id}>
-            <PropertyCard property={property} />
-          </StaggerItem>
-        ))}
-      </StaggerContainer>
+      {loading ? (
+        <div className="grid gap-8 md:grid-cols-2 xl:grid-cols-3">
+          <Skeleton variant="card" count={3} />
+        </div>
+      ) : (
+        <StaggerContainer className="grid gap-8 md:grid-cols-2 xl:grid-cols-3">
+          {featuredProperties.map((property) => (
+            <StaggerItem key={property.id}>
+              <PropertyCard property={property} />
+            </StaggerItem>
+          ))}
+        </StaggerContainer>
+      )}
     </div>
   );
 }

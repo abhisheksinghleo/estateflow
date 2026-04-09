@@ -7,192 +7,286 @@ const API_BASE_URL =
 const api = axios.create({
   baseURL: API_BASE_URL,
   timeout: 10000,
-  headers: {
-    "Content-Type": "application/json",
-  },
+  headers: { "Content-Type": "application/json" },
 });
 
-// Optional request interceptor for auth token support
+// Request interceptor for auth token
 api.interceptors.request.use(
   (config) => {
-    // TODO: replace with your auth/session implementation
     if (typeof window !== "undefined") {
       const token = localStorage.getItem("authToken");
-      if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
-      }
+      if (token) config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
   },
   (error) => Promise.reject(error),
 );
 
-// Optional response interceptor for centralized error handling
+// Response interceptor
 api.interceptors.response.use(
   (response) => response,
-  (error) => {
-    // TODO: integrate toast/logger service here if needed
-    return Promise.reject(error);
-  },
+  (error) => Promise.reject(error),
 );
 
-// ---- Mock fallback data for MVP mode ----
-const MOCK_PROPERTIES = [
-  {
-    id: "p1",
-    slug: "modern-villa-california",
-    title: "Modern Villa in California",
-    type: "buy",
-    price: 1250000,
-    beds: 4,
-    baths: 3,
-    area: 3200,
-    city: "Los Angeles",
-    image:
-      "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1200&q=80",
-    featured: true,
-  },
-  {
-    id: "p2",
-    slug: "downtown-luxury-apartment",
-    title: "Downtown Luxury Apartment",
-    type: "rent",
-    price: 3200,
-    beds: 2,
-    baths: 2,
-    area: 1100,
-    city: "New York",
-    image:
-      "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=1200&q=80",
-    featured: true,
-  },
-  {
-    id: "p3",
-    slug: "suburban-family-home",
-    title: "Suburban Family Home",
-    type: "buy",
-    price: 640000,
-    beds: 3,
-    baths: 2,
-    area: 2100,
-    city: "Austin",
-    image:
-      "https://images.unsplash.com/photo-1568605114967-8130f3a36994?auto=format&fit=crop&w=1200&q=80",
-    featured: false,
-  },
-];
+// ── Mock fallback data ──
+import {
+  properties as mockProperties,
+  agents as mockAgents,
+  stats as mockStats,
+  featuredProperties as mockFeatured,
+  getPropertyBySlug as mockGetBySlug,
+  getPropertiesByListingType as mockGetByType,
+} from "./mockData";
 
-const useMockFallback =
-  process.env.NEXT_PUBLIC_USE_MOCK_API === "true" ||
-  process.env.NODE_ENV !== "production";
+const useMockFallback = true;
 
 const withMockFallback = async (apiCall, fallbackValue) => {
   try {
     const response = await apiCall();
     return response.data;
   } catch (error) {
-    if (useMockFallback) {
-      // TODO: remove fallback when backend API is stable
-      return fallbackValue;
-    }
+    if (useMockFallback) return fallbackValue;
     throw error;
   }
 };
 
-// ---- Property API helpers ----
+// ══════════════════════════════════════════════════
+// CURRENCY UTILITIES
+// ══════════════════════════════════════════════════
+
+const currencyConfig = {
+  USD: { symbol: "$", locale: "en-US" },
+  INR: { symbol: "₹", locale: "en-IN" },
+  EUR: { symbol: "€", locale: "en-DE" },
+  GBP: { symbol: "£", locale: "en-GB" },
+  AED: { symbol: "AED ", locale: "en-AE" },
+};
+
+export function formatPrice(price, currency = "USD") {
+  const cfg = currencyConfig[currency] || currencyConfig.USD;
+  if (currency === "INR") {
+    if (price >= 10000000) {
+      const cr = (price / 10000000).toFixed(2).replace(/\.?0+$/, "");
+      return `${cfg.symbol}${cr} Cr`;
+    }
+    if (price >= 100000) {
+      const lk = (price / 100000).toFixed(2).replace(/\.?0+$/, "");
+      return `${cfg.symbol}${lk} Lakh`;
+    }
+    return `${cfg.symbol}${price.toLocaleString("en-IN")}`;
+  }
+  return `${cfg.symbol}${price.toLocaleString(cfg.locale)}`;
+}
+
+export const supportedCurrencies = Object.keys(currencyConfig);
+
+// ══════════════════════════════════════════════════
+// PROPERTY API
+// ══════════════════════════════════════════════════
+
 export const propertyApi = {
-  /**
-   * Fetch all properties.
-   * @param {Object} params - Optional query params: { type, minPrice, maxPrice, city, beds, baths, page, limit }
-   */
   async getProperties(params = {}) {
-    const fallback = applyPropertyFilters(MOCK_PROPERTIES, params);
+    const fallback = applyPropertyFilters(mockProperties, params);
     return withMockFallback(() => api.get("/properties", { params }), fallback);
   },
 
-  /**
-   * Fetch featured properties.
-   */
-  async getFeaturedProperties() {
-    const fallback = MOCK_PROPERTIES.filter((p) => p.featured);
-    return withMockFallback(() => api.get("/properties/featured"), fallback);
-  },
-
-  /**
-   * Fetch single property by slug.
-   */
-  async getPropertyBySlug(slug) {
-    const fallback =
-      MOCK_PROPERTIES.find((p) => p.slug === slug) || MOCK_PROPERTIES[0];
-    return withMockFallback(() => api.get(`/properties/${slug}`), fallback);
-  },
-};
-
-// ---- Generic helpers (optional for future use) ----
-export const inquiryApi = {
-  /**
-   * Submit a property inquiry.
-   */
-  async createInquiry(payload) {
-    const fallback = {
-      success: true,
-      message: "Inquiry submitted (mock mode).",
-      data: payload,
-    };
-    return withMockFallback(() => api.post("/inquiries", payload), fallback);
-  },
-};
-
-export const authApi = {
-  async login(payload) {
-    const fallback = {
-      token: "mock-jwt-token",
-      user: { id: "u1", name: "Demo User", role: "buyer" },
-    };
-    return withMockFallback(() => api.post("/auth/login", payload), fallback);
-  },
-
-  async register(payload) {
-    const fallback = {
-      token: "mock-jwt-token",
-      user: { id: "u2", name: payload?.name || "New User", role: "buyer" },
-    };
+  async getPropertiesByType(listingType) {
     return withMockFallback(
-      () => api.post("/auth/register", payload),
-      fallback,
+      () => api.get("/properties", { params: { listingType } }),
+      mockGetByType(listingType),
     );
   },
+
+  async getFeaturedProperties() {
+    return withMockFallback(() => api.get("/properties/featured"), mockFeatured);
+  },
+
+  async getPropertyBySlug(slug) {
+    return withMockFallback(() => api.get(`/properties/${slug}`), mockGetBySlug(slug) || null);
+  },
 };
 
-// ---- Local filter utility for mock mode ----
+// ══════════════════════════════════════════════════
+// AGENT API
+// ══════════════════════════════════════════════════
+
+export const agentApi = {
+  async getAgents() { return withMockFallback(() => api.get("/agents"), mockAgents); },
+  async getAgentById(id) {
+    return withMockFallback(() => api.get(`/agents/${id}`), mockAgents.find((a) => a.id === id) || null);
+  },
+};
+
+// ══════════════════════════════════════════════════
+// STATS API
+// ══════════════════════════════════════════════════
+
+export const statsApi = {
+  async getStats() { return withMockFallback(() => api.get("/stats"), mockStats); },
+};
+
+// ══════════════════════════════════════════════════
+// INQUIRY API
+// ══════════════════════════════════════════════════
+
+export const inquiryApi = {
+  async createInquiry(payload) {
+    return withMockFallback(() => api.post("/inquiries", payload), { success: true, message: "Inquiry submitted successfully.", data: payload });
+  },
+};
+
+// ══════════════════════════════════════════════════
+// CONTACT API
+// ══════════════════════════════════════════════════
+
+export const contactApi = {
+  async submitContact(payload) {
+    return withMockFallback(() => api.post("/contact", payload), { success: true, message: "Thanks! Your message has been sent." });
+  },
+  async getOfficeLocations() {
+    return withMockFallback(() => api.get("/contact/offices"), [
+      { city: "Austin", address: "124 Greenwood Ave, Austin, TX 78704", phone: "+1 (555) 120-4488", email: "austin@estateflow.com" },
+      { city: "New York", address: "88 Riverfront St, New York, NY 10019", phone: "+1 (555) 889-3021", email: "nyc@estateflow.com" },
+      { city: "Mumbai", address: "14th Floor, BKC, Mumbai 400051", phone: "+91 22 4455 6677", email: "mumbai@estateflow.com" },
+    ]);
+  },
+};
+
+// ══════════════════════════════════════════════════
+// AUTH API
+// ══════════════════════════════════════════════════
+
+export const authApi = {
+  async login(payload) { return (await api.post("/auth/login", payload)).data; },
+  async register(payload) { return (await api.post("/auth/register", payload)).data; },
+  async getMe() { return (await api.get("/auth/me")).data; },
+  async updateProfile(payload) { return (await api.put("/auth/profile", payload)).data; },
+};
+
+// ══════════════════════════════════════════════════
+// FAVORITES API
+// ══════════════════════════════════════════════════
+
+export const favoriteApi = {
+  async getFavorites() { return withMockFallback(() => api.get("/favorites"), []); },
+  async addFavorite(propertyId) { return (await api.post(`/favorites/${propertyId}`)).data; },
+  async removeFavorite(propertyId) { return (await api.delete(`/favorites/${propertyId}`)).data; },
+};
+
+// ══════════════════════════════════════════════════
+// SELLER API — Property management for sellers
+// ══════════════════════════════════════════════════
+
+export const sellerApi = {
+  async getMyProperties() { return (await api.get("/seller/properties")).data; },
+
+  async createProperty(payload) { return (await api.post("/seller/properties", payload)).data; },
+
+  async updateProperty(id, payload) { return (await api.put(`/seller/properties/${id}`, payload)).data; },
+
+  async deleteProperty(id) { return (await api.delete(`/seller/properties/${id}`)).data; },
+
+  async togglePublish(id) { return (await api.put(`/seller/properties/${id}/publish`)).data; },
+
+  async getLeads() { return (await api.get("/seller/leads")).data; },
+
+  async getSoldProperties() { return (await api.get("/seller/sold")).data; },
+};
+
+// ══════════════════════════════════════════════════
+// PURCHASE API — Buy/Offer for buyers
+// ══════════════════════════════════════════════════
+
+export const purchaseApi = {
+  /** type: 'buy_now' | 'offer' */
+  async buyProperty(payload) { return (await api.post("/purchases", payload)).data; },
+
+  async getPurchaseHistory() { return (await api.get("/purchases")).data; },
+
+  async respondToOffer(purchaseId, action) {
+    return (await api.put(`/purchases/${purchaseId}/respond`, { action })).data;
+  },
+};
+
+// ══════════════════════════════════════════════════
+// MESSAGES API
+// ══════════════════════════════════════════════════
+
+export const messageApi = {
+  async getMessages() { return (await api.get("/messages")).data; },
+
+  async sendMessage(payload) { return (await api.post("/messages", payload)).data; },
+
+  async markRead(id) { return (await api.put(`/messages/${id}/read`)).data; },
+};
+
+// ══════════════════════════════════════════════════
+// NOTIFICATIONS API
+// ══════════════════════════════════════════════════
+
+export const notificationApi = {
+  async getNotifications() { return (await api.get("/notifications")).data; },
+
+  async markRead(id) { return (await api.put(`/notifications/${id}/read`)).data; },
+
+  async markAllRead() { return (await api.put("/notifications/read-all")).data; },
+};
+
+// ══════════════════════════════════════════════════
+// ADMIN API
+// ══════════════════════════════════════════════════
+
+export const adminApi = {
+  async getUsers() { return (await api.get("/admin/users")).data; },
+  async createUser(payload) { return (await api.post("/admin/users", payload)).data; },
+  async updateUser(id, payload) { return (await api.put(`/admin/users/${id}`, payload)).data; },
+  async deleteUser(id) { return (await api.delete(`/admin/users/${id}`)).data; },
+  async getCoAdmins() { return (await api.get("/admin/co-admins")).data; },
+  async createCoAdmin(payload) { return (await api.post("/admin/co-admins", payload)).data; },
+  async updateCoAdminPermissions(id, permissions) { return (await api.put(`/admin/co-admins/${id}/permissions`, permissions)).data; },
+  async revokeCoAdmin(id) { return (await api.delete(`/admin/co-admins/${id}`)).data; },
+  async createProperty(payload) { return (await api.post("/admin/properties", payload)).data; },
+  async deleteProperty(id) { return (await api.delete(`/admin/properties/${id}`)).data; },
+};
+
+// ══════════════════════════════════════════════════
+// DASHBOARD APIs
+// ══════════════════════════════════════════════════
+
+export const dashboardApi = {
+  async getAdminOverview() {
+    return withMockFallback(() => api.get("/dashboard/admin"), {
+      metrics: [], complianceAlerts: [], systemHealth: [],
+    });
+  },
+  async getBuyerDashboard() {
+    return withMockFallback(() => api.get("/dashboard/buyer"), {
+      userName: "User", favoriteCount: 0, purchaseCount: 0, unreadMessages: 0, unreadNotifications: 0,
+    });
+  },
+  async getSellerDashboard() {
+    return withMockFallback(() => api.get("/dashboard/seller"), {
+      userName: "Seller", listingSummary: [], totalListings: 0, unreadMessages: 0, unreadNotifications: 0,
+    });
+  },
+  async getAgentDashboard() {
+    return withMockFallback(() => api.get("/dashboard/agent"), {
+      leadStats: [], assignedProperties: [], unreadMessages: 0,
+    });
+  },
+};
+
+// ── Filter utility for mock mode ──
 function applyPropertyFilters(properties, params = {}) {
   let result = [...properties];
-
-  if (params.type) {
-    result = result.filter((p) => p.type === String(params.type));
-  }
-
-  if (params.city) {
-    const city = String(params.city).toLowerCase();
-    result = result.filter((p) => p.city.toLowerCase().includes(city));
-  }
-
-  if (params.minPrice != null) {
-    result = result.filter((p) => p.price >= Number(params.minPrice));
-  }
-
-  if (params.maxPrice != null) {
-    result = result.filter((p) => p.price <= Number(params.maxPrice));
-  }
-
-  if (params.beds != null) {
-    result = result.filter((p) => p.beds >= Number(params.beds));
-  }
-
-  if (params.baths != null) {
-    result = result.filter((p) => p.baths >= Number(params.baths));
-  }
-
+  if (params.type) result = result.filter((p) => p.type === String(params.type));
+  if (params.listingType) result = result.filter((p) => p.listingType === String(params.listingType));
+  if (params.city) { const c = String(params.city).toLowerCase(); result = result.filter((p) => p.city.toLowerCase().includes(c)); }
+  if (params.location) { const l = String(params.location).toLowerCase(); result = result.filter((p) => `${p.city} ${p.state} ${p.address}`.toLowerCase().includes(l)); }
+  if (params.minPrice != null) result = result.filter((p) => p.price >= Number(params.minPrice));
+  if (params.maxPrice != null) result = result.filter((p) => p.price <= Number(params.maxPrice));
+  if (params.beds != null) result = result.filter((p) => p.beds >= Number(params.beds));
+  if (params.baths != null) result = result.filter((p) => p.baths >= Number(params.baths));
   return result;
 }
 

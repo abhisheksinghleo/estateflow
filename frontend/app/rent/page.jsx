@@ -1,23 +1,20 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import PropertyCard from "@/components/PropertyCard";
 import PropertyFilters from "@/components/PropertyFilters";
 import SearchBar from "@/components/SearchBar";
+import Skeleton from "@/components/Skeleton";
 import FadeIn from "@/components/animations/FadeIn";
-import { properties } from "@/lib/mockData";
-
-const rentProperties = properties.filter(
-  (property) => property.listingType === "rent",
-);
+import { propertyApi } from "@/lib/api";
+import useApi from "@/lib/useApi";
 
 /* ── helper: apply any combination of filters to the property list ── */
 function applyFilters(list, filters) {
   if (!filters) return list;
 
   return list.filter((p) => {
-    // Location (city/state/address text match)
     if (
       filters.location &&
       !`${p.city} ${p.state} ${p.address}`
@@ -26,7 +23,6 @@ function applyFilters(list, filters) {
     )
       return false;
 
-    // Property type (from sidebar)
     if (
       filters.propertyType &&
       filters.propertyType !== "Any" &&
@@ -34,7 +30,6 @@ function applyFilters(list, filters) {
     )
       return false;
 
-    // Property type (from SearchBar — uses "type" key)
     if (
       filters.type &&
       filters.type !== "Any" &&
@@ -42,11 +37,9 @@ function applyFilters(list, filters) {
     )
       return false;
 
-    // Price range
     if (filters.minPrice && p.price < Number(filters.minPrice)) return false;
     if (filters.maxPrice && p.price > Number(filters.maxPrice)) return false;
 
-    // Bedrooms
     if (
       filters.bedrooms &&
       filters.bedrooms !== "Any" &&
@@ -54,7 +47,6 @@ function applyFilters(list, filters) {
     )
       return false;
 
-    // Bathrooms
     if (
       filters.bathrooms &&
       filters.bathrooms !== "Any" &&
@@ -62,7 +54,6 @@ function applyFilters(list, filters) {
     )
       return false;
 
-    // Area range
     if (filters.minArea && p.areaSqFt < Number(filters.minArea)) return false;
     if (filters.maxArea && p.areaSqFt > Number(filters.maxArea)) return false;
 
@@ -71,17 +62,16 @@ function applyFilters(list, filters) {
 }
 
 export default function RentPage() {
-  return (
-    <Suspense fallback={<div className="min-h-screen bg-surface" />}>
-      <RentPageContent />
-    </Suspense>
-  );
-}
-
-function RentPageContent() {
   const [sort, setSort] = useState("newest");
   const [activeFilters, setActiveFilters] = useState(null);
   const searchParams = useSearchParams();
+
+  // Fetch all rental properties from API
+  const { data: rentProperties, loading } = useApi(
+    () => propertyApi.getPropertiesByType("rent"),
+    [],
+    [],
+  );
 
   /* Read URL query params on mount (from homepage search) */
   useEffect(() => {
@@ -116,7 +106,7 @@ function RentPageContent() {
     setActiveFilters(null);
   };
 
-  const filtered = applyFilters(rentProperties, activeFilters);
+  const filtered = applyFilters(rentProperties || [], activeFilters);
 
   const sorted = [...filtered].sort((a, b) => {
     if (sort === "priceLowHigh") return a.price - b.price;
@@ -170,18 +160,24 @@ function RentPageContent() {
             {/* Toolbar — tonal surface shift, no border */}
             <div className="flex flex-col gap-2 rounded-xl bg-surface-container-lowest px-4 py-3 shadow-ambient sm:flex-row sm:items-center sm:justify-between">
               <p className="text-body-sm text-on-surface-variant">
-                Showing{" "}
-                <span className="font-semibold text-on-surface">
-                  {sorted.length}
-                </span>{" "}
-                rental listing{sorted.length !== 1 ? "s" : ""}
-                {activeFilters && (
-                  <button
-                    onClick={handleReset}
-                    className="ml-3 text-label-sm font-medium text-primary hover:text-primary/80 underline transition-colors duration-200"
-                  >
-                    Clear filters
-                  </button>
+                {loading ? (
+                  <span className="text-outline">Loading rentals…</span>
+                ) : (
+                  <>
+                    Showing{" "}
+                    <span className="font-semibold text-on-surface">
+                      {sorted.length}
+                    </span>{" "}
+                    rental listing{sorted.length !== 1 ? "s" : ""}
+                    {activeFilters && (
+                      <button
+                        onClick={handleReset}
+                        className="ml-3 text-label-sm font-medium text-primary hover:text-primary/80 underline transition-colors duration-200"
+                      >
+                        Clear filters
+                      </button>
+                    )}
+                  </>
                 )}
               </p>
               <select
@@ -197,7 +193,11 @@ function RentPageContent() {
               </select>
             </div>
 
-            {sorted.length > 0 ? (
+            {loading ? (
+              <div className="grid gap-5 sm:grid-cols-2">
+                <Skeleton variant="card" count={4} />
+              </div>
+            ) : sorted.length > 0 ? (
               <div className="grid gap-5 sm:grid-cols-2">
                 {sorted.map((property) => (
                   <PropertyCard
@@ -208,12 +208,14 @@ function RentPageContent() {
                       title: property.title,
                       city: `${property.city}, ${property.state}`,
                       price: property.price,
+                      currency: property.currency || "USD",
                       beds: property.beds,
                       baths: property.baths,
                       area: property.areaSqFt,
                       image: property.image,
                       type: "Rent",
                       featured: property.featured,
+                      listedByAgent: property.listedByAgent || false,
                     }}
                   />
                 ))}

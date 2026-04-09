@@ -1,220 +1,251 @@
 "use client";
 
-import FadeIn from "@/components/animations/FadeIn";
-import { StaggerContainer, StaggerItem } from "@/components/animations/StaggerReveal";
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useAuth } from "@/context/AuthContext";
+import { dashboardApi, messageApi, authApi, formatPrice } from "@/lib/api";
 
-const leadStats = [
-  { label: "New Leads", value: 14, tone: "bg-primary-fixed text-primary" },
-  { label: "Contacted", value: 28, tone: "bg-amber-100 text-amber-700" },
-  { label: "Qualified", value: 12, tone: "bg-emerald-100 text-emerald-700" },
-  { label: "Closed This Month", value: 5, tone: "bg-violet-100 text-violet-700" },
+/* ═══ ICONS ═══ */
+const icons = {
+  overview: <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>,
+  assignments: <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>,
+  messages: <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" /></svg>,
+  profile: <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>,
+};
+
+const tabs = [
+  { key: "overview", label: "Overview", icon: icons.overview },
+  { key: "assignments", label: "Assigned Properties", icon: icons.assignments },
+  { key: "messages", label: "Messages", icon: icons.messages },
+  { key: "profile", label: "Profile", icon: icons.profile },
 ];
 
-const recentLeads = [
-  {
-    id: "L-1001",
-    name: "Olivia Carter",
-    interest: "Modern Family Home in Austin",
-    budget: "$550,000 - $700,000",
-    source: "Website Inquiry",
-    status: "New",
-    lastContact: "Today, 10:15 AM",
-  },
-  {
-    id: "L-1002",
-    name: "Liam Johnson",
-    interest: "Downtown Luxury Apartment",
-    budget: "$3,500 / month",
-    source: "Referral",
-    status: "Contacted",
-    lastContact: "Yesterday, 4:40 PM",
-  },
-  {
-    id: "L-1003",
-    name: "Sophia Turner",
-    interest: "Coastal Villa in Miami",
-    budget: "$1.2M - $1.6M",
-    source: "Landing Page",
-    status: "Qualified",
-    lastContact: "2 days ago",
-  },
-  {
-    id: "L-1004",
-    name: "Noah Patel",
-    interest: "Suburban Townhouse",
-    budget: "$400,000 - $500,000",
-    source: "Ad Campaign",
-    status: "Follow-up",
-    lastContact: "3 days ago",
-  },
-];
-
-const appointments = [
-  {
-    id: "APT-501",
-    client: "Olivia Carter",
-    property: "Modern Family Home in Austin",
-    date: "Mon, 12 Aug",
-    time: "11:00 AM",
-    type: "In-person Tour",
-  },
-  {
-    id: "APT-502",
-    client: "Sophia Turner",
-    property: "Coastal Villa in Miami",
-    date: "Tue, 13 Aug",
-    time: "2:30 PM",
-    type: "Virtual Tour",
-  },
-  {
-    id: "APT-503",
-    client: "Liam Johnson",
-    property: "Downtown Luxury Apartment",
-    date: "Wed, 14 Aug",
-    time: "5:00 PM",
-    type: "Consultation Call",
-  },
-];
-
-function statusBadge(status) {
-  const map = {
-    New: "bg-primary-fixed text-primary",
-    Contacted: "bg-amber-100 text-amber-700",
-    Qualified: "bg-emerald-100 text-emerald-700",
-    "Follow-up": "bg-violet-100 text-violet-700",
-  };
-
-  return map[status] || "bg-surface-container-low text-on-surface";
+function StatusBadge({ status }) {
+  const m = { active: "bg-emerald-100 text-emerald-700", sold: "bg-blue-100 text-blue-700", draft: "bg-gray-200 text-gray-600", pending: "bg-amber-100 text-amber-700" };
+  return <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${m[status] || "bg-gray-100 text-gray-600"}`}>{status?.charAt(0).toUpperCase() + status?.slice(1)}</span>;
 }
 
 export default function AgentDashboardPage() {
-  return (
-    <main className="min-h-screen bg-surface">
-      <div className="mx-auto max-w-7xl px-6 lg:px-8 py-10 space-y-8">
-        {/* Header */}
-        <FadeIn>
-          <section className="rounded-2xl bg-surface-container-lowest p-6 shadow-ambient">
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-              <div>
-                <span className="text-label-sm font-semibold uppercase tracking-widest text-primary">Agent Workspace</span>
-                <h1 className="mt-2 font-display text-headline-lg text-on-surface">
-                  Dashboard Overview
-                </h1>
-                <p className="mt-2 text-body-md text-on-surface-variant">
-                  Track leads, upcoming appointments, and day-to-day activity.
-                </p>
-              </div>
-              <button className="btn-primary w-full sm:w-auto">
-                + Add New Lead
-              </button>
-            </div>
-          </section>
-        </FadeIn>
+  const { user, updateUser } = useAuth();
+  const [activeTab, setActiveTab] = useState("overview");
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
-        {/* Lead Stats */}
-        <StaggerContainer className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          {leadStats.map((item) => (
-            <StaggerItem key={item.label}>
-              <article className="rounded-2xl bg-surface-container-lowest p-5 shadow-ambient transition-all duration-300 hover:shadow-ambient-lg hover:-translate-y-1">
-                <p className="text-body-sm text-on-surface-variant">{item.label}</p>
-                <div className="mt-3 flex items-center justify-between">
-                  <p className="font-display text-headline-md text-on-surface">{item.value}</p>
-                  <span className={`rounded-full px-3 py-1 text-label-sm font-semibold ${item.tone}`}>
-                    Live
-                  </span>
-                </div>
-              </article>
-            </StaggerItem>
-          ))}
-        </StaggerContainer>
+  const [dashData, setDashData] = useState(null);
+  const [msgs, setMsgs] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-        {/* Main Grid: Table + Sidebar */}
-        <section className="grid gap-6 xl:grid-cols-3">
-          <FadeIn direction="left">
-            <article className="rounded-2xl bg-surface-container-lowest p-5 shadow-ambient xl:col-span-2">
-              <div className="mb-4 flex items-center justify-between">
-                <h2 className="font-display text-title-lg text-on-surface">Recent Leads</h2>
-                <button className="rounded-lg bg-surface-container-low px-3 py-1.5 text-label-sm font-medium text-on-surface hover:bg-surface-container transition-colors duration-200">
-                  View All
-                </button>
-              </div>
+  const [profileForm, setProfileForm] = useState({ name: "", email: "", phone: "", address: "", city: "", state: "", zip: "", country: "", bio: "", currentPassword: "", newPassword: "" });
+  const [profileMsg, setProfileMsg] = useState("");
 
-              <div className="overflow-x-auto">
-                <table className="min-w-full text-left text-body-sm">
-                  <thead>
-                    {/* Tonal header row instead of border */}
-                    <tr className="bg-surface-container-low text-on-surface-variant">
-                      <th className="px-3 py-2 font-medium rounded-l-lg">Lead</th>
-                      <th className="px-3 py-2 font-medium">Interest</th>
-                      <th className="px-3 py-2 font-medium">Budget</th>
-                      <th className="px-3 py-2 font-medium">Source</th>
-                      <th className="px-3 py-2 font-medium">Status</th>
-                      <th className="px-3 py-2 font-medium rounded-r-lg">Last Contact</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {recentLeads.map((lead) => (
-                      <tr key={lead.id} className="align-top hover:bg-surface-container-low/50 transition-colors duration-150">
-                        <td className="px-3 py-3">
-                          <p className="font-medium text-on-surface">{lead.name}</p>
-                          <p className="text-label-sm text-outline">{lead.id}</p>
-                        </td>
-                        <td className="px-3 py-3 text-on-surface">{lead.interest}</td>
-                        <td className="px-3 py-3 text-on-surface">{lead.budget}</td>
-                        <td className="px-3 py-3 text-on-surface">{lead.source}</td>
-                        <td className="px-3 py-3">
-                          <span
-                            className={`inline-flex rounded-full px-2.5 py-1 text-label-sm font-semibold ${statusBadge(
-                              lead.status
-                            )}`}
-                          >
-                            {lead.status}
-                          </span>
-                        </td>
-                        <td className="px-3 py-3 text-outline">{lead.lastContact}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </article>
-          </FadeIn>
+  useEffect(() => { loadData(); }, []);
+  useEffect(() => {
+    if (user) setProfileForm({ name: user.name || "", email: user.email || "", phone: user.phone || "", address: user.address || "", city: user.city || "", state: user.state || "", zip: user.zip || "", country: user.country || "", bio: user.bio || "", currentPassword: "", newPassword: "" });
+  }, [user]);
 
-          <FadeIn direction="right" delay={0.1}>
-            <aside className="space-y-6">
-              <article className="rounded-2xl bg-surface-container-lowest p-5 shadow-ambient">
-                <h2 className="font-display text-title-lg text-on-surface">Today&apos;s Agenda</h2>
-                <ul className="mt-4 space-y-3">
-                  {appointments.map((item) => (
-                    <li
-                      key={item.id}
-                      className="rounded-xl bg-surface-container-low p-3"
-                    >
-                      <p className="font-medium text-on-surface">{item.client}</p>
-                      <p className="text-body-sm text-on-surface-variant">{item.property}</p>
-                      <p className="mt-1 text-label-sm text-outline">
-                        {item.date} • {item.time} • {item.type}
-                      </p>
-                    </li>
-                  ))}
-                </ul>
-              </article>
+  async function loadData() {
+    setLoading(true);
+    try {
+      const [dash, messages] = await Promise.all([
+        dashboardApi.getAgentDashboard(),
+        messageApi.getMessages().catch(() => []),
+      ]);
+      setDashData(dash);
+      setMsgs(messages);
+    } catch (e) { console.error(e); }
+    setLoading(false);
+  }
 
-              <article className="rounded-2xl bg-surface-container-lowest p-5 shadow-ambient">
-                <h2 className="font-display text-title-lg text-on-surface">Quick Actions</h2>
-                <div className="mt-4 grid gap-2">
-                  <button className="btn-secondary justify-center">Schedule Appointment</button>
-                  <button className="btn-secondary justify-center">Send Follow-up Email</button>
-                  <button className="btn-secondary justify-center">Create Property Match</button>
-                </div>
-                <p className="mt-4 text-label-sm text-outline">
-                  TODO: Connect actions to CRM/workflow APIs.
-                </p>
-              </article>
-            </aside>
-          </FadeIn>
-        </section>
+  async function handleProfileSave(e) {
+    e.preventDefault();
+    setProfileMsg("");
+    try {
+      const res = await authApi.updateProfile(profileForm);
+      if (res.user) updateUser(res.user);
+      setProfileMsg("✅ Profile updated!");
+      setProfileForm((f) => ({ ...f, currentPassword: "", newPassword: "" }));
+    } catch (e) {
+      setProfileMsg("❌ " + (e.response?.data?.message || "Failed"));
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-surface">
+        <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
       </div>
-    </main>
+    );
+  }
+
+  const unreadMsgs = msgs.filter((m) => m.direction === "received" && !m.isRead).length;
+
+  return (
+    <div className="flex min-h-screen bg-surface">
+      <button onClick={() => setSidebarOpen(!sidebarOpen)} className="fixed top-20 left-4 z-50 lg:hidden rounded-xl bg-surface-container-lowest p-2 shadow-ambient">
+        <svg className="w-6 h-6 text-on-surface" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg>
+      </button>
+
+      <aside className={`fixed inset-y-0 left-0 z-40 w-64 bg-surface-container-lowest shadow-ambient-lg transform transition-transform duration-300 lg:relative lg:translate-x-0 pt-20 lg:pt-4 ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}`}>
+        <div className="px-4 py-6">
+          <div className="flex items-center gap-3 mb-8 px-2">
+            <div className="w-10 h-10 rounded-full bg-violet-100 flex items-center justify-center text-violet-700 font-bold text-lg">{user?.name?.charAt(0) || "A"}</div>
+            <div>
+              <p className="font-semibold text-on-surface text-sm">{user?.name || "Agent"}</p>
+              <p className="text-xs text-on-surface-variant">Agent Account</p>
+            </div>
+          </div>
+          <nav className="space-y-1">
+            {tabs.map((t) => (
+              <button key={t.key} onClick={() => { setActiveTab(t.key); setSidebarOpen(false); }}
+                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${activeTab === t.key ? "bg-primary text-on-primary shadow-sm" : "text-on-surface-variant hover:bg-surface-container-low"}`}>
+                {t.icon}
+                {t.label}
+                {t.key === "messages" && unreadMsgs > 0 && <span className="ml-auto bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">{unreadMsgs}</span>}
+              </button>
+            ))}
+          </nav>
+        </div>
+      </aside>
+
+      {sidebarOpen && <div className="fixed inset-0 bg-black/30 z-30 lg:hidden" onClick={() => setSidebarOpen(false)} />}
+
+      <main className="flex-1 px-4 sm:px-6 lg:px-8 py-6 lg:py-8 max-w-6xl">
+        <AnimatePresence mode="wait">
+          <motion.div key={activeTab} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }} transition={{ duration: 0.25 }}>
+
+            {/* OVERVIEW */}
+            {activeTab === "overview" && (
+              <div className="space-y-6">
+                <div>
+                  <h1 className="font-display text-2xl font-bold text-on-surface">Agent Workspace</h1>
+                  <p className="text-sm text-on-surface-variant mt-1">Manage assigned properties and track performance.</p>
+                </div>
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                  {(dashData?.leadStats || []).map((s) => (
+                    <div key={s.label} className="rounded-2xl bg-surface-container-lowest p-5 shadow-ambient hover:shadow-ambient-lg transition-all">
+                      <p className="text-xs font-medium text-on-surface-variant uppercase tracking-wide">{s.label}</p>
+                      <p className="mt-2 font-display text-2xl font-bold text-on-surface">{s.value}</p>
+                    </div>
+                  ))}
+                </div>
+                {/* Assigned properties preview */}
+                <div className="rounded-2xl bg-surface-container-lowest p-5 shadow-ambient">
+                  <h2 className="font-display text-lg font-semibold text-on-surface mb-4">Assigned Properties</h2>
+                  {(dashData?.assignedProperties || []).length === 0 ? (
+                    <p className="text-sm text-on-surface-variant">No properties assigned yet. Sellers will assign you properties to list.</p>
+                  ) : (
+                    <div className="space-y-2">
+                      {(dashData?.assignedProperties || []).map((p) => (
+                        <div key={p.id} className="flex items-center justify-between rounded-xl bg-surface-container-low px-4 py-3">
+                          <div>
+                            <p className="text-sm font-medium text-on-surface">{p.title}</p>
+                            <p className="text-xs text-on-surface-variant">{p.city} • Seller: {p.sellerName}</p>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-sm font-semibold text-primary">{formatPrice(p.price, p.currency)}</p>
+                            <StatusBadge status={p.status} />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* ASSIGNED PROPERTIES */}
+            {activeTab === "assignments" && (
+              <div className="space-y-6">
+                <h1 className="font-display text-2xl font-bold text-on-surface">Assigned Properties</h1>
+                {(dashData?.assignedProperties || []).length === 0 ? (
+                  <div className="rounded-2xl bg-surface-container-lowest p-10 text-center shadow-ambient">
+                    <p className="text-on-surface-variant">No properties assigned to you yet.</p>
+                  </div>
+                ) : (
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    {(dashData?.assignedProperties || []).map((p) => (
+                      <div key={p.id} className="rounded-2xl bg-surface-container-lowest shadow-ambient p-4 space-y-3">
+                        <div className="flex items-start justify-between">
+                          <h3 className="font-semibold text-on-surface">{p.title}</h3>
+                          <StatusBadge status={p.status} />
+                        </div>
+                        <p className="text-sm text-on-surface-variant">{p.city} • Seller: {p.sellerName}</p>
+                        <p className="text-lg font-bold text-primary">{formatPrice(p.price, p.currency)}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* MESSAGES */}
+            {activeTab === "messages" && (
+              <div className="space-y-6">
+                <h1 className="font-display text-2xl font-bold text-on-surface">Messages</h1>
+                {msgs.length === 0 ? (
+                  <div className="rounded-2xl bg-surface-container-lowest p-10 text-center shadow-ambient">
+                    <p className="text-on-surface-variant">No messages yet.</p>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {msgs.map((m) => (
+                      <div key={m.id} className={`rounded-2xl p-4 shadow-ambient ${m.isRead ? "bg-surface-container-lowest" : "bg-primary-fixed/10 border-l-4 border-primary"}`}>
+                        <div className="flex items-start justify-between">
+                          <div>
+                            <p className="text-sm font-semibold text-on-surface">{m.direction === "received" ? `From: ${m.fromName}` : `To: ${m.toName}`}</p>
+                            {m.subject && <p className="text-sm font-medium text-on-surface mt-0.5">{m.subject}</p>}
+                            <p className="text-sm text-on-surface-variant mt-1">{m.body}</p>
+                            {m.propertyTitle && <p className="text-xs text-primary mt-1">Re: {m.propertyTitle}</p>}
+                          </div>
+                          <p className="text-xs text-outline whitespace-nowrap ml-4">{new Date(m.createdAt).toLocaleDateString()}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* PROFILE */}
+            {activeTab === "profile" && (
+              <div className="space-y-6 max-w-2xl">
+                <h1 className="font-display text-2xl font-bold text-on-surface">Profile Settings</h1>
+                {profileMsg && <div className={`rounded-xl p-3 text-sm ${profileMsg.startsWith("✅") ? "bg-emerald-50 text-emerald-700" : "bg-red-50 text-red-600"}`}>{profileMsg}</div>}
+                <form onSubmit={handleProfileSave} className="space-y-4 rounded-2xl bg-surface-container-lowest p-6 shadow-ambient">
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    {[
+                      { key: "name", label: "Full Name", type: "text" },
+                      { key: "email", label: "Email", type: "email" },
+                      { key: "phone", label: "Phone", type: "tel" },
+                      { key: "address", label: "Address", type: "text" },
+                      { key: "city", label: "City", type: "text" },
+                      { key: "state", label: "State", type: "text" },
+                      { key: "zip", label: "ZIP / Pin Code", type: "text" },
+                      { key: "country", label: "Country", type: "text" },
+                    ].map((f) => (
+                      <div key={f.key}>
+                        <label className="block text-xs font-medium text-on-surface-variant mb-1">{f.label}</label>
+                        <input type={f.type} value={profileForm[f.key]} onChange={(e) => setProfileForm({ ...profileForm, [f.key]: e.target.value })} className="w-full rounded-xl border-0 bg-surface-container-low px-4 py-2.5 text-sm text-on-surface focus:ring-2 focus:ring-primary" />
+                      </div>
+                    ))}
+                    <div className="sm:col-span-2">
+                      <label className="block text-xs font-medium text-on-surface-variant mb-1">Bio</label>
+                      <textarea value={profileForm.bio} onChange={(e) => setProfileForm({ ...profileForm, bio: e.target.value })} rows={3} className="w-full rounded-xl border-0 bg-surface-container-low px-4 py-2.5 text-sm text-on-surface focus:ring-2 focus:ring-primary" />
+                    </div>
+                  </div>
+                  <hr className="border-surface-container-low" />
+                  <p className="text-sm font-medium text-on-surface">Change Password</p>
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <div><label className="block text-xs font-medium text-on-surface-variant mb-1">Current Password</label><input type="password" value={profileForm.currentPassword} onChange={(e) => setProfileForm({ ...profileForm, currentPassword: e.target.value })} className="w-full rounded-xl border-0 bg-surface-container-low px-4 py-2.5 text-sm text-on-surface focus:ring-2 focus:ring-primary" /></div>
+                    <div><label className="block text-xs font-medium text-on-surface-variant mb-1">New Password</label><input type="password" value={profileForm.newPassword} onChange={(e) => setProfileForm({ ...profileForm, newPassword: e.target.value })} className="w-full rounded-xl border-0 bg-surface-container-low px-4 py-2.5 text-sm text-on-surface focus:ring-2 focus:ring-primary" /></div>
+                  </div>
+                  <button type="submit" className="btn-primary">Save Changes</button>
+                </form>
+              </div>
+            )}
+
+          </motion.div>
+        </AnimatePresence>
+      </main>
+    </div>
   );
 }
