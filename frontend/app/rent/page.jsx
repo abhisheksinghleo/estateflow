@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import PropertyCard from "@/components/PropertyCard";
 import PropertyFilters from "@/components/PropertyFilters";
 import SearchBar from "@/components/SearchBar";
@@ -11,47 +12,110 @@ const rentProperties = properties.filter(
   (property) => property.listingType === "rent",
 );
 
+/* ── helper: apply any combination of filters to the property list ── */
+function applyFilters(list, filters) {
+  if (!filters) return list;
+
+  return list.filter((p) => {
+    // Location (city/state/address text match)
+    if (
+      filters.location &&
+      !`${p.city} ${p.state} ${p.address}`
+        .toLowerCase()
+        .includes(filters.location.toLowerCase())
+    )
+      return false;
+
+    // Property type (from sidebar)
+    if (
+      filters.propertyType &&
+      filters.propertyType !== "Any" &&
+      p.type !== filters.propertyType
+    )
+      return false;
+
+    // Property type (from SearchBar — uses "type" key)
+    if (
+      filters.type &&
+      filters.type !== "Any" &&
+      p.type !== filters.type
+    )
+      return false;
+
+    // Price range
+    if (filters.minPrice && p.price < Number(filters.minPrice)) return false;
+    if (filters.maxPrice && p.price > Number(filters.maxPrice)) return false;
+
+    // Bedrooms
+    if (
+      filters.bedrooms &&
+      filters.bedrooms !== "Any" &&
+      p.beds < parseInt(filters.bedrooms)
+    )
+      return false;
+
+    // Bathrooms
+    if (
+      filters.bathrooms &&
+      filters.bathrooms !== "Any" &&
+      p.baths < parseInt(filters.bathrooms)
+    )
+      return false;
+
+    // Area range
+    if (filters.minArea && p.areaSqFt < Number(filters.minArea)) return false;
+    if (filters.maxArea && p.areaSqFt > Number(filters.maxArea)) return false;
+
+    return true;
+  });
+}
+
 export default function RentPage() {
   const [sort, setSort] = useState("newest");
   const [activeFilters, setActiveFilters] = useState(null);
+  const searchParams = useSearchParams();
 
+  /* Read URL query params on mount (from homepage search) */
+  useEffect(() => {
+    const loc = searchParams.get("location");
+    const type = searchParams.get("type");
+    const maxPrice = searchParams.get("maxPrice");
+    if (loc || type || maxPrice) {
+      setActiveFilters({
+        location: loc || "",
+        type: type || "Any",
+        maxPrice: maxPrice || "",
+      });
+    }
+  }, [searchParams]);
+
+  /* SearchBar submit → filters listing */
+  const handleSearch = (searchForm) => {
+    setActiveFilters({
+      location: searchForm.location,
+      type: searchForm.type,
+      maxPrice: searchForm.maxPrice,
+    });
+  };
+
+  /* Sidebar filter apply */
   const handleApply = (filters) => {
     setActiveFilters(filters);
   };
 
+  /* Reset */
   const handleReset = () => {
     setActiveFilters(null);
   };
 
-  const sorted = [...rentProperties].sort((a, b) => {
+  const filtered = applyFilters(rentProperties, activeFilters);
+
+  const sorted = [...filtered].sort((a, b) => {
     if (sort === "priceLowHigh") return a.price - b.price;
     if (sort === "priceHighLow") return b.price - a.price;
     if (sort === "beds") return b.beds - a.beds;
     return 0; // newest — already ordered
   });
-
-  const filtered = activeFilters
-    ? sorted.filter((p) => {
-        if (
-          activeFilters.location &&
-          !`${p.city} ${p.state}`
-            .toLowerCase()
-            .includes(activeFilters.location.toLowerCase())
-        )
-          return false;
-        if (activeFilters.minPrice && p.price < Number(activeFilters.minPrice))
-          return false;
-        if (activeFilters.maxPrice && p.price > Number(activeFilters.maxPrice))
-          return false;
-        if (
-          activeFilters.bedrooms &&
-          activeFilters.bedrooms !== "Any" &&
-          p.beds < parseInt(activeFilters.bedrooms)
-        )
-          return false;
-        return true;
-      })
-    : sorted;
 
   return (
     <section className="min-h-screen bg-surface">
@@ -76,6 +140,7 @@ export default function RentPage() {
 
       <div className="mx-auto max-w-7xl px-6 lg:px-8 -mt-6 relative z-10">
         <SearchBar
+          onSearch={handleSearch}
           defaultValues={{
             purpose: "rent",
             location: "",
@@ -99,9 +164,17 @@ export default function RentPage() {
               <p className="text-body-sm text-on-surface-variant">
                 Showing{" "}
                 <span className="font-semibold text-on-surface">
-                  {filtered.length}
+                  {sorted.length}
                 </span>{" "}
-                rental listing{filtered.length !== 1 ? "s" : ""}
+                rental listing{sorted.length !== 1 ? "s" : ""}
+                {activeFilters && (
+                  <button
+                    onClick={handleReset}
+                    className="ml-3 text-label-sm font-medium text-primary hover:text-primary/80 underline transition-colors duration-200"
+                  >
+                    Clear filters
+                  </button>
+                )}
               </p>
               <select
                 className="input-base max-w-xs"
@@ -116,22 +189,22 @@ export default function RentPage() {
               </select>
             </div>
 
-            {filtered.length > 0 ? (
+            {sorted.length > 0 ? (
               <div className="grid gap-5 sm:grid-cols-2">
-                {filtered.map((property) => (
+                {sorted.map((property) => (
                   <PropertyCard
                     key={property.id}
                     property={{
                       id: property.id,
                       slug: property.slug,
                       title: property.title,
-                      location: `${property.city}, ${property.state}`,
+                      city: `${property.city}, ${property.state}`,
                       price: property.price,
                       beds: property.beds,
                       baths: property.baths,
                       area: property.areaSqFt,
                       image: property.image,
-                      type: "For Rent",
+                      type: "Rent",
                       featured: property.featured,
                     }}
                   />

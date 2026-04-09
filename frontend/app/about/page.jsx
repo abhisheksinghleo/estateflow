@@ -142,7 +142,7 @@ export default function AboutPage() {
                 transition={{ duration: 0.5, ease: "easeOut" }}
               >
                 <img
-                  src="https://images.unsplash.com/photo-1510627489930-0c1b0bfeb9b9?q=80&w=2070&auto=format&fit=crop"
+                  src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=2070&q=80"
                   alt="Home Exterior"
                   className="w-full h-[450px] object-cover"
                 />

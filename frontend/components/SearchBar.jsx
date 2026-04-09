@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-const propertyTypes = ["Any", "Apartment", "Villa", "Townhouse", "Plot", "Commercial"];
+const propertyTypes = ["Any", "House", "Condo", "Apartment", "Townhouse", "Villa"];
 
 export default function SearchBar({
   onSearch,
@@ -65,7 +65,8 @@ export default function SearchBar({
           <select
             value={form.type}
             onChange={(e) => handleChange("type", e.target.value)}
-            className="w-full bg-transparent py-1 text-label-lg font-semibold text-on-surface focus:outline-none appearance-none cursor-pointer"
+            className="w-full bg-transparent py-1 text-label-lg font-semibold text-on-surface focus:outline-none cursor-pointer"
+            style={{ accentColor: "#845333" }}
           >
             {propertyTypes.map((type) => (
               <option key={type} value={type}>{type}</option>

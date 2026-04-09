@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import PropertyCard from "@/components/PropertyCard";
 import PropertyFilters from "@/components/PropertyFilters";
 import SearchBar from "@/components/SearchBar";
@@ -9,50 +10,103 @@ import { getPropertiesByListingType } from "@/lib/mockData";
 
 const allBuyProperties = getPropertiesByListingType("buy");
 
+/* ── helper: apply any combination of filters to the property list ── */
+function applyFilters(list, filters) {
+  if (!filters) return list;
+
+  return list.filter((p) => {
+    // Location (city/state text match)
+    if (
+      filters.location &&
+      !`${p.city} ${p.state} ${p.address}`
+        .toLowerCase()
+        .includes(filters.location.toLowerCase())
+    )
+      return false;
+
+    // Property type
+    if (
+      filters.propertyType &&
+      filters.propertyType !== "Any" &&
+      p.type !== filters.propertyType
+    )
+      return false;
+
+    // Also support "type" key from SearchBar (which passes as "type")
+    if (
+      filters.type &&
+      filters.type !== "Any" &&
+      p.type !== filters.type
+    )
+      return false;
+
+    // Price range
+    if (filters.minPrice && p.price < Number(filters.minPrice)) return false;
+    if (filters.maxPrice && p.price > Number(filters.maxPrice)) return false;
+
+    // Bedrooms
+    if (
+      filters.bedrooms &&
+      filters.bedrooms !== "Any" &&
+      p.beds < parseInt(filters.bedrooms)
+    )
+      return false;
+
+    // Bathrooms
+    if (
+      filters.bathrooms &&
+      filters.bathrooms !== "Any" &&
+      p.baths < parseInt(filters.bathrooms)
+    )
+      return false;
+
+    // Area range
+    if (filters.minArea && p.areaSqFt < Number(filters.minArea)) return false;
+    if (filters.maxArea && p.areaSqFt > Number(filters.maxArea)) return false;
+
+    return true;
+  });
+}
+
 export default function BuyPage() {
   const [sort, setSort] = useState("recommended");
   const [activeFilters, setActiveFilters] = useState(null);
+  const searchParams = useSearchParams();
 
+  /* Read URL query params on mount (from homepage search) */
+  useEffect(() => {
+    const loc = searchParams.get("location");
+    const type = searchParams.get("type");
+    const maxPrice = searchParams.get("maxPrice");
+    if (loc || type || maxPrice) {
+      setActiveFilters({
+        location: loc || "",
+        type: type || "Any",
+        maxPrice: maxPrice || "",
+      });
+    }
+  }, [searchParams]);
+
+  /* SearchBar submit → filters listing */
+  const handleSearch = (searchForm) => {
+    setActiveFilters({
+      location: searchForm.location,
+      type: searchForm.type,
+      maxPrice: searchForm.maxPrice,
+    });
+  };
+
+  /* Sidebar filter apply */
   const handleApply = (filters) => {
     setActiveFilters(filters);
   };
 
+  /* Reset */
   const handleReset = () => {
     setActiveFilters(null);
   };
 
-  const filtered = activeFilters
-    ? allBuyProperties.filter((p) => {
-        if (
-          activeFilters.location &&
-          !`${p.city} ${p.state}`
-            .toLowerCase()
-            .includes(activeFilters.location.toLowerCase())
-        )
-          return false;
-        if (activeFilters.minPrice && p.price < Number(activeFilters.minPrice))
-          return false;
-        if (activeFilters.maxPrice && p.price > Number(activeFilters.maxPrice))
-          return false;
-        if (
-          activeFilters.bedrooms &&
-          activeFilters.bedrooms !== "Any" &&
-          p.beds < parseInt(activeFilters.bedrooms)
-        )
-          return false;
-        if (
-          activeFilters.bathrooms &&
-          activeFilters.bathrooms !== "Any" &&
-          p.baths < parseInt(activeFilters.bathrooms)
-        )
-          return false;
-        if (activeFilters.minArea && p.areaSqFt < Number(activeFilters.minArea))
-          return false;
-        if (activeFilters.maxArea && p.areaSqFt > Number(activeFilters.maxArea))
-          return false;
-        return true;
-      })
-    : allBuyProperties;
+  const filtered = applyFilters(allBuyProperties, activeFilters);
 
   const sorted = [...filtered].sort((a, b) => {
     if (sort === "price-low-high") return a.price - b.price;
@@ -85,6 +139,7 @@ export default function BuyPage() {
 
       <div className="mx-auto max-w-7xl px-6 lg:px-8 -mt-6 relative z-10">
         <SearchBar
+          onSearch={handleSearch}
           defaultValues={{
             location: "",
             purpose: "buy",
@@ -140,9 +195,9 @@ export default function BuyPage() {
                     key={property.id}
                     property={{
                       ...property,
-                      location: `${property.city}, ${property.state}`,
+                      city: `${property.city}, ${property.state}`,
                       area: property.areaSqFt,
-                      type: "For Sale",
+                      type: "Sale",
                     }}
                   />
                 ))}

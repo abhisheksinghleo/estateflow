@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { motion, useReducedMotion } from "framer-motion";
 import HeroSection from "@/components/HeroSection";
 import SearchBar from "@/components/SearchBar";
@@ -44,6 +45,16 @@ const features = [
 
 export default function HomePage() {
   const shouldReduceMotion = useReducedMotion();
+  const router = useRouter();
+
+  const handleHomeSearch = (form) => {
+    const params = new URLSearchParams();
+    if (form.location) params.set("location", form.location);
+    if (form.type && form.type !== "Any") params.set("type", form.type);
+    if (form.maxPrice) params.set("maxPrice", form.maxPrice);
+    const target = form.purpose === "rent" ? "/rent" : "/buy";
+    router.push(`${target}?${params.toString()}`);
+  };
 
   return (
     <div className="min-h-screen bg-surface">
@@ -51,7 +62,7 @@ export default function HomePage() {
       <section>
         <HeroSection />
         <div className="px-6 lg:px-8">
-          <SearchBar />
+          <SearchBar onSearch={handleHomeSearch} />
         </div>
       </section>
 

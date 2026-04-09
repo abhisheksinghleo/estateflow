@@ -35,7 +35,7 @@ export default function HeroSection() {
         transition={{ duration: 12, ease: [0.25, 0.46, 0.45, 0.94] }}
       >
         <img
-          src="https://images.unsplash.com/photo-1600585154340-be6199f7d009?auto=format&fit=crop&w=1920&q=80"
+          src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1920&q=80"
           alt="Modern luxury home at golden hour"
           className="h-full w-full object-cover"
         />

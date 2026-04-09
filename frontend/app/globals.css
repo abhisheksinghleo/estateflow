@@ -182,3 +182,14 @@ p, h1, h2, h3, h4, h5, h6 { overflow-wrap: break-word; }
 
 /* ===== Selection ===== */
 ::selection { background: #c68b67; color: #fff; }
+
+/* ===== Select Dropdown Styling ===== */
+select option:checked,
+select option:hover {
+  background: #ffdbc8; /* primary-fixed */
+  color: #845333;
+}
+
+select {
+  accent-color: #845333;
+}

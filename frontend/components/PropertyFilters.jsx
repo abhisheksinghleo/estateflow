@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-const propertyTypes = ["Any", "Apartment", "Villa", "Townhouse", "Plot", "Studio"];
+const propertyTypes = ["Any", "House", "Condo", "Apartment", "Townhouse", "Villa"];
 const listingTypes = ["Any", "Buy", "Rent"];
 const bedrooms = ["Any", "1+", "2+", "3+", "4+"];
 const bathrooms = ["Any", "1+", "2+", "3+"];
