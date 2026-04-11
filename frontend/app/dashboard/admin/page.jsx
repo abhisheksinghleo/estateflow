@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/context/AuthContext";
@@ -30,7 +30,7 @@ function severityStyles(s) {
   return "bg-emerald-50 text-emerald-700";
 }
 
-export default function AdminDashboardPage() {
+function AdminDashboardPageContent() {
   const searchParams = useSearchParams();
   const initialTab = searchParams.get("tab") || "overview";
   const [activeTab, setActiveTab] = useState(initialTab);
@@ -491,5 +491,13 @@ export default function AdminDashboardPage() {
         </div>
       </div>
     </section>
+  );
+}
+
+export default function AdminDashboardPage() {
+  return (
+    <Suspense>
+      <AdminDashboardPageContent />
+    </Suspense>
   );
 }

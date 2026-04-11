@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import PropertyCard from "@/components/PropertyCard";
 import PropertyFilters from "@/components/PropertyFilters";
@@ -61,7 +61,7 @@ function applyFilters(list, filters) {
   });
 }
 
-export default function RentPage() {
+function RentPageContent() {
   const [sort, setSort] = useState("newest");
   const [activeFilters, setActiveFilters] = useState(null);
   const searchParams = useSearchParams();
@@ -240,5 +240,13 @@ export default function RentPage() {
         </div>
       </div>
     </section>
+  );
+}
+
+export default function RentPage() {
+  return (
+    <Suspense>
+      <RentPageContent />
+    </Suspense>
   );
 }
