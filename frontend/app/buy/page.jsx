@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect, Suspense, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import PropertyCard from "@/components/PropertyCard";
 import PropertyFilters from "@/components/PropertyFilters";
@@ -14,55 +14,45 @@ import useApi from "@/lib/useApi";
 function applyFilters(list, filters) {
   if (!filters) return list;
 
+  const locFilter = filters.location ? filters.location.toLowerCase() : null;
+  const minPrice = filters.minPrice ? Number(filters.minPrice) : null;
+  const maxPrice = filters.maxPrice ? Number(filters.maxPrice) : null;
+  const minBeds = filters.bedrooms && filters.bedrooms !== "Any" ? parseInt(filters.bedrooms) : null;
+  const minBaths = filters.bathrooms && filters.bathrooms !== "Any" ? parseInt(filters.bathrooms) : null;
+  const minArea = filters.minArea ? Number(filters.minArea) : null;
+  const maxArea = filters.maxArea ? Number(filters.maxArea) : null;
+  const filterPropType = filters.propertyType && filters.propertyType !== "Any" ? filters.propertyType : null;
+  const filterType = filters.type && filters.type !== "Any" ? filters.type : null;
+
   return list.filter((p) => {
     // Location (city/state text match)
     if (
-      filters.location &&
+      locFilter &&
       !`${p.city} ${p.state} ${p.address}`
         .toLowerCase()
-        .includes(filters.location.toLowerCase())
+        .includes(locFilter)
     )
       return false;
 
     // Property type
-    if (
-      filters.propertyType &&
-      filters.propertyType !== "Any" &&
-      p.type !== filters.propertyType
-    )
-      return false;
+    if (filterPropType && p.type !== filterPropType) return false;
 
     // Also support "type" key from SearchBar (which passes as "type")
-    if (
-      filters.type &&
-      filters.type !== "Any" &&
-      p.type !== filters.type
-    )
-      return false;
+    if (filterType && p.type !== filterType) return false;
 
     // Price range
-    if (filters.minPrice && p.price < Number(filters.minPrice)) return false;
-    if (filters.maxPrice && p.price > Number(filters.maxPrice)) return false;
+    if (minPrice !== null && p.price < minPrice) return false;
+    if (maxPrice !== null && p.price > maxPrice) return false;
 
     // Bedrooms
-    if (
-      filters.bedrooms &&
-      filters.bedrooms !== "Any" &&
-      p.beds < parseInt(filters.bedrooms)
-    )
-      return false;
+    if (minBeds !== null && p.beds < minBeds) return false;
 
     // Bathrooms
-    if (
-      filters.bathrooms &&
-      filters.bathrooms !== "Any" &&
-      p.baths < parseInt(filters.bathrooms)
-    )
-      return false;
+    if (minBaths !== null && p.baths < minBaths) return false;
 
     // Area range
-    if (filters.minArea && p.areaSqFt < Number(filters.minArea)) return false;
-    if (filters.maxArea && p.areaSqFt > Number(filters.maxArea)) return false;
+    if (minArea !== null && p.areaSqFt < minArea) return false;
+    if (maxArea !== null && p.areaSqFt > maxArea) return false;
 
     return true;
   });
@@ -113,15 +103,19 @@ function BuyPageContent() {
     setActiveFilters(null);
   };
 
-  const filtered = applyFilters(allBuyProperties || [], activeFilters);
+  const filtered = useMemo(() => {
+    return applyFilters(allBuyProperties || [], activeFilters);
+  }, [allBuyProperties, activeFilters]);
 
-  const sorted = [...filtered].sort((a, b) => {
-    if (sort === "price-low-high") return a.price - b.price;
-    if (sort === "price-high-low") return b.price - a.price;
-    if (sort === "newest") return b.id.localeCompare(a.id);
-    // recommended — featured first
-    return (b.featured ? 1 : 0) - (a.featured ? 1 : 0);
-  });
+  const sorted = useMemo(() => {
+    return [...filtered].sort((a, b) => {
+      if (sort === "price-low-high") return a.price - b.price;
+      if (sort === "price-high-low") return b.price - a.price;
+      if (sort === "newest") return b.id.localeCompare(a.id);
+      // recommended — featured first
+      return (b.featured ? 1 : 0) - (a.featured ? 1 : 0);
+    });
+  }, [filtered, sort]);
 
   return (
     <section className="min-h-screen bg-surface">

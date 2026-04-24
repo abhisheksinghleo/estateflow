@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect, Suspense, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import PropertyCard from "@/components/PropertyCard";
 import PropertyFilters from "@/components/PropertyFilters";
@@ -14,48 +14,38 @@ import useApi from "@/lib/useApi";
 function applyFilters(list, filters) {
   if (!filters) return list;
 
+  const locFilter = filters.location ? filters.location.toLowerCase() : null;
+  const minPrice = filters.minPrice ? Number(filters.minPrice) : null;
+  const maxPrice = filters.maxPrice ? Number(filters.maxPrice) : null;
+  const minBeds = filters.bedrooms && filters.bedrooms !== "Any" ? parseInt(filters.bedrooms) : null;
+  const minBaths = filters.bathrooms && filters.bathrooms !== "Any" ? parseInt(filters.bathrooms) : null;
+  const minArea = filters.minArea ? Number(filters.minArea) : null;
+  const maxArea = filters.maxArea ? Number(filters.maxArea) : null;
+  const filterPropType = filters.propertyType && filters.propertyType !== "Any" ? filters.propertyType : null;
+  const filterType = filters.type && filters.type !== "Any" ? filters.type : null;
+
   return list.filter((p) => {
     if (
-      filters.location &&
+      locFilter &&
       !`${p.city} ${p.state} ${p.address}`
         .toLowerCase()
-        .includes(filters.location.toLowerCase())
+        .includes(locFilter)
     )
       return false;
 
-    if (
-      filters.propertyType &&
-      filters.propertyType !== "Any" &&
-      p.type !== filters.propertyType
-    )
-      return false;
+    if (filterPropType && p.type !== filterPropType) return false;
 
-    if (
-      filters.type &&
-      filters.type !== "Any" &&
-      p.type !== filters.type
-    )
-      return false;
+    if (filterType && p.type !== filterType) return false;
 
-    if (filters.minPrice && p.price < Number(filters.minPrice)) return false;
-    if (filters.maxPrice && p.price > Number(filters.maxPrice)) return false;
+    if (minPrice !== null && p.price < minPrice) return false;
+    if (maxPrice !== null && p.price > maxPrice) return false;
 
-    if (
-      filters.bedrooms &&
-      filters.bedrooms !== "Any" &&
-      p.beds < parseInt(filters.bedrooms)
-    )
-      return false;
+    if (minBeds !== null && p.beds < minBeds) return false;
 
-    if (
-      filters.bathrooms &&
-      filters.bathrooms !== "Any" &&
-      p.baths < parseInt(filters.bathrooms)
-    )
-      return false;
+    if (minBaths !== null && p.baths < minBaths) return false;
 
-    if (filters.minArea && p.areaSqFt < Number(filters.minArea)) return false;
-    if (filters.maxArea && p.areaSqFt > Number(filters.maxArea)) return false;
+    if (minArea !== null && p.areaSqFt < minArea) return false;
+    if (maxArea !== null && p.areaSqFt > maxArea) return false;
 
     return true;
   });
@@ -106,14 +96,18 @@ function RentPageContent() {
     setActiveFilters(null);
   };
 
-  const filtered = applyFilters(rentProperties || [], activeFilters);
+  const filtered = useMemo(() => {
+    return applyFilters(rentProperties || [], activeFilters);
+  }, [rentProperties, activeFilters]);
 
-  const sorted = [...filtered].sort((a, b) => {
-    if (sort === "priceLowHigh") return a.price - b.price;
-    if (sort === "priceHighLow") return b.price - a.price;
-    if (sort === "beds") return b.beds - a.beds;
-    return 0; // newest — already ordered
-  });
+  const sorted = useMemo(() => {
+    return [...filtered].sort((a, b) => {
+      if (sort === "priceLowHigh") return a.price - b.price;
+      if (sort === "priceHighLow") return b.price - a.price;
+      if (sort === "beds") return b.beds - a.beds;
+      return 0; // newest — already ordered
+    });
+  }, [filtered, sort]);
 
   return (
     <section className="min-h-screen bg-surface">

@@ -1,0 +1,3 @@
+## 2024-04-24 - Extracted Loop Invariants and Memoized Filters
+**Learning:** Found that string lowercase operations and number parsing were being evaluated on every item in `.filter()` loops inside `frontend/app/buy/page.jsx` and `frontend/app/rent/page.jsx`. In addition, the filter logic and sorting were completely un-memoized, causing full O(N*logN) + O(N) operations on every single component render (e.g. typing in inputs).
+**Action:** Always move static data parsing (like URL params to Numbers/lower-cased strings) OUTSIDE the filter iteration loop. Always wrap expensive list derivation (filter/sort) in `useMemo` hooks when building list views in React.
