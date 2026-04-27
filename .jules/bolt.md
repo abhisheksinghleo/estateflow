@@ -1,0 +1,3 @@
+## 2024-05-18 - Preserving Object Identity for React.memo in Lists
+**Learning:** Wrapping a component in `React.memo` is ineffective if its props are derived from an array mapping function that creates new object references on every render. `useMemo` must be used to memoize the array itself, or the object identity preservation must be shifted outside the component's render function.
+**Action:** When creating lists of objects to pass as props, always make sure the mapping occurs inside a `useMemo` block if you want children to utilize `React.memo`. Alternatively, construct the correctly shaped objects before setting state.
