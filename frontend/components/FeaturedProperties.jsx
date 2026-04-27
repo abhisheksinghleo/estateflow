@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import Link from "next/link";
 import PropertyCard from "@/components/PropertyCard";
 import Skeleton from "@/components/Skeleton";
@@ -15,7 +16,7 @@ export default function FeaturedProperties({ hideTitle = false }) {
   );
 
   // Map API/mock shape → PropertyCard shape
-  const featuredProperties = (rawFeatured || []).map((p) => ({
+  const featuredProperties = React.useMemo(() => (rawFeatured || []).map((p) => ({
     id: p.id,
     slug: p.slug,
     title: p.title,
@@ -29,7 +30,7 @@ export default function FeaturedProperties({ hideTitle = false }) {
     type: p.listingType === "rent" ? "Rent" : "Sale",
     featured: p.featured,
     listedByAgent: p.listedByAgent || false,
-  }));
+  })), [rawFeatured]);
 
   return (
     <div className={hideTitle ? "" : "mx-auto max-w-7xl px-6 py-14 lg:px-8"}>
