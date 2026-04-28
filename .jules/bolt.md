@@ -1,0 +1,3 @@
+## 2024-05-18 - [Optimizing React Re-Renders]
+**Learning:** Found an opportunity to prevent expensive array filtering and sorting on every render in Next.js page components (`buy/page.jsx` and `rent/page.jsx`) and prevent expensive object mapping in `FeaturedProperties.jsx`. While installing linters without permission breaks boundaries, the useMemo optimization itself is a solid, targeted performance win.
+**Action:** Use `useMemo` to cache computationally expensive operations like array filtering, sorting, and mapping in React components. Always verify boundaries (like not modifying package.json) before attempting environment changes.
