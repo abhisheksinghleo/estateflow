@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect, Suspense, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import PropertyCard from "@/components/PropertyCard";
 import PropertyFilters from "@/components/PropertyFilters";
@@ -106,14 +106,35 @@ function RentPageContent() {
     setActiveFilters(null);
   };
 
-  const filtered = applyFilters(rentProperties || [], activeFilters);
+  // ⚡ Bolt: Memoize filtering, sorting, and mapping to prevent expensive O(n) recalculations
+  // and inline object creation on every render, allowing React.memo to work on PropertyCard.
+  const processedListings = useMemo(() => {
+    const list = rentProperties || [];
+    const filtered = applyFilters(list, activeFilters);
 
-  const sorted = [...filtered].sort((a, b) => {
-    if (sort === "priceLowHigh") return a.price - b.price;
-    if (sort === "priceHighLow") return b.price - a.price;
-    if (sort === "beds") return b.beds - a.beds;
-    return 0; // newest — already ordered
-  });
+    const sorted = [...filtered].sort((a, b) => {
+      if (sort === "priceLowHigh") return a.price - b.price;
+      if (sort === "priceHighLow") return b.price - a.price;
+      if (sort === "beds") return b.beds - a.beds;
+      return 0; // newest — already ordered
+    });
+
+    return sorted.map((property) => ({
+      id: property.id,
+      slug: property.slug,
+      title: property.title,
+      city: `${property.city}, ${property.state}`,
+      price: property.price,
+      currency: property.currency || "USD",
+      beds: property.beds,
+      baths: property.baths,
+      area: property.areaSqFt,
+      image: property.image,
+      type: "Rent",
+      featured: property.featured,
+      listedByAgent: property.listedByAgent || false,
+    }));
+  }, [rentProperties, activeFilters, sort]);
 
   return (
     <section className="min-h-screen bg-surface">
@@ -166,9 +187,9 @@ function RentPageContent() {
                   <>
                     Showing{" "}
                     <span className="font-semibold text-on-surface">
-                      {sorted.length}
+                      {processedListings.length}
                     </span>{" "}
-                    rental listing{sorted.length !== 1 ? "s" : ""}
+                    rental listing{processedListings.length !== 1 ? "s" : ""}
                     {activeFilters && (
                       <button
                         onClick={handleReset}
@@ -197,27 +218,10 @@ function RentPageContent() {
               <div className="grid gap-5 sm:grid-cols-2">
                 <Skeleton variant="card" count={4} />
               </div>
-            ) : sorted.length > 0 ? (
+            ) : processedListings.length > 0 ? (
               <div className="grid gap-5 sm:grid-cols-2">
-                {sorted.map((property) => (
-                  <PropertyCard
-                    key={property.id}
-                    property={{
-                      id: property.id,
-                      slug: property.slug,
-                      title: property.title,
-                      city: `${property.city}, ${property.state}`,
-                      price: property.price,
-                      currency: property.currency || "USD",
-                      beds: property.beds,
-                      baths: property.baths,
-                      area: property.areaSqFt,
-                      image: property.image,
-                      type: "Rent",
-                      featured: property.featured,
-                      listedByAgent: property.listedByAgent || false,
-                    }}
-                  />
+                {processedListings.map((property) => (
+                  <PropertyCard key={property.id} property={property} />
                 ))}
               </div>
             ) : (
