@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect, useMemo, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import PropertyCard from "@/components/PropertyCard";
 import PropertyFilters from "@/components/PropertyFilters";
@@ -113,15 +113,21 @@ function BuyPageContent() {
     setActiveFilters(null);
   };
 
-  const filtered = applyFilters(allBuyProperties || [], activeFilters);
+  // ⚡ Bolt: Memoize filtering to avoid O(N) recalculations on re-renders when data/filters haven't changed.
+  const filtered = useMemo(() => {
+    return applyFilters(allBuyProperties || [], activeFilters);
+  }, [allBuyProperties, activeFilters]);
 
-  const sorted = [...filtered].sort((a, b) => {
-    if (sort === "price-low-high") return a.price - b.price;
-    if (sort === "price-high-low") return b.price - a.price;
-    if (sort === "newest") return b.id.localeCompare(a.id);
-    // recommended — featured first
-    return (b.featured ? 1 : 0) - (a.featured ? 1 : 0);
-  });
+  // ⚡ Bolt: Memoize sorting to avoid O(N log N) recalculations on re-renders. Reduces re-renders CPU overhead significantly for large lists.
+  const sorted = useMemo(() => {
+    return [...filtered].sort((a, b) => {
+      if (sort === "price-low-high") return a.price - b.price;
+      if (sort === "price-high-low") return b.price - a.price;
+      if (sort === "newest") return b.id.localeCompare(a.id);
+      // recommended — featured first
+      return (b.featured ? 1 : 0) - (a.featured ? 1 : 0);
+    });
+  }, [filtered, sort]);
 
   return (
     <section className="min-h-screen bg-surface">
