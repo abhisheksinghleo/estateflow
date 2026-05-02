@@ -1,0 +1,3 @@
+## 2024-11-20 - [Client-side API Caching with Supabase in Next.js]
+**Learning:** Supabase doesn't aggressively cache `.select()` queries by default. When building a client-side heavy Next.js App Router SPA using `use client` components and a generic API hook (`useApi`), navigating between routes continuously remounts components and triggers redundant network requests for semi-static data like listings.
+**Action:** Implement a simple in-memory Map cache (Stale-While-Revalidate pattern) in the base data fetching hook (`useApi.js`) and pass global cache keys for frequently accessed data to save bandwidth and make route transitions instant.

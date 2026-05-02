@@ -78,6 +78,7 @@ function BuyPageContent() {
     () => propertyApi.getPropertiesByType("buy"),
     [],
     [],
+    "buy_properties"
   );
 
   /* Read URL query params on mount (from homepage search) */
