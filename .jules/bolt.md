@@ -1,0 +1,3 @@
+## 2024-05-24 - Avoid Infinite Render Loops with Inline Arrays in Hooks
+**Learning:** Adding array parameters (like `fallback` arrays from call sites) into a `useEffect` dependency array in custom hooks (like `useApi.js`) will cause an infinite render loop if the calling component passes an inline array literal (e.g. `fallback = []`). React sees the inline array as a new reference on every render, triggering the effect repeatedly.
+**Action:** Be extremely cautious when adding function or object/array parameters to hook dependency arrays. Use `eslint-disable-next-line react-hooks/exhaustive-deps` if necessary, or ensure stable references via `useMemo` at the call site.
