@@ -1,0 +1,3 @@
+## 2024-05-05 - SWR Caching for useApi
+**Learning:** Managing dynamic route changes when using a centralized custom API hook requires careful cache handling. When implementing SWR (Stale-While-Revalidate) in `useApi`, just using `useEffect` with `cacheKey` in the dependency array isn't enough because dynamic routing might re-render the component without unmounting it, leading to stale data flashes.
+**Action:** Always derive cache state changes directly during the render cycle (`if (cacheKey !== currentCacheKey)`) to synchronously update the state when the cache key changes, preventing layout shifts and stale data rendering in Next.js App Router applications.
