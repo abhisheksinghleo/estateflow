@@ -25,6 +25,7 @@ export default function ContactPage() {
     () => contactApi.getOfficeLocations(),
     [],
     [],
+    "offices"
   );
 
   const handleChange = (event) => {
