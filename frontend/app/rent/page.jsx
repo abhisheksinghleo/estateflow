@@ -67,11 +67,7 @@ function RentPageContent() {
   const searchParams = useSearchParams();
 
   // Fetch all rental properties from API
-  const { data: rentProperties, loading } = useApi(
-    () => propertyApi.getPropertiesByType("rent"),
-    [],
-    [],
-  );
+  const { data: rentProperties, loading } = useApi(() => propertyApi.getPropertiesByType("rent"), [], [], "rent_properties");
 
   /* Read URL query params on mount (from homepage search) */
   useEffect(() => {

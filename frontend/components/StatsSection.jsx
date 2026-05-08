@@ -27,11 +27,7 @@ const fallbackStats = [
 ];
 
 export default function StatsSection() {
-  const { data: rawStats, loading } = useApi(
-    () => statsApi.getStats(),
-    [],
-    fallbackStats,
-  );
+  const { data: rawStats, loading } = useApi(() => statsApi.getStats(), [], fallbackStats, "stats");
 
   const stats = (rawStats || fallbackStats).map(mapStat);
 

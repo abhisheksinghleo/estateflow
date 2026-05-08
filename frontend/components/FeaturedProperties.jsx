@@ -8,11 +8,7 @@ import { propertyApi } from "@/lib/api";
 import useApi from "@/lib/useApi";
 
 export default function FeaturedProperties({ hideTitle = false }) {
-  const { data: rawFeatured, loading } = useApi(
-    () => propertyApi.getFeaturedProperties(),
-    [],
-    [],
-  );
+  const { data: rawFeatured, loading } = useApi(() => propertyApi.getFeaturedProperties(), [], [], "featured_properties");
 
   // Map API/mock shape → PropertyCard shape
   const featuredProperties = (rawFeatured || []).map((p) => ({

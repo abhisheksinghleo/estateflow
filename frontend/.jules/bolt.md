@@ -1,0 +1,4 @@
+## 2025-05-08 - [SWR Caching Infinite Loop Prevention]
+**Learning:** The `useApi` hook manages a custom SWR cache based on `cacheKey`. If `fallback` is added to the `useEffect` dependency array when using `useApi` cache, and the caller provides an inline array literal (e.g. `[]` in `const { data: allBuyProperties, loading } = useApi(() => propertyApi.getPropertiesByType("buy"), [], []);`), the hook will re-render infinitely. Also, to properly handle dynamic route changes without unmounting components when using `cacheKey`, the `cacheKey` updates must be managed by deriving state from props during render (`if (cacheKey !== currentCacheKey)`), rather than using a `useEffect`.
+
+**Action:** Be careful not to add `fallback` to `useApi`'s dependency arrays. Use SWR logic that handles changing cacheKeys correctly by checking them synchronously in the render flow instead of inside an effect.
