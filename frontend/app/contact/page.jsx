@@ -21,11 +21,7 @@ export default function ContactPage() {
   const [submitting, setSubmitting] = useState(false);
 
   // Fetch office locations from API
-  const { data: officeLocations, loading: loadingOffices } = useApi(
-    () => contactApi.getOfficeLocations(),
-    [],
-    [],
-  );
+  const { data: officeLocations, loading: loadingOffices } = useApi(() => contactApi.getOfficeLocations(), [], [], "office_locations");
 
   const handleChange = (event) => {
     const { name, value, type, checked } = event.target;

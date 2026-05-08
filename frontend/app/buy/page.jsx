@@ -74,11 +74,7 @@ function BuyPageContent() {
   const searchParams = useSearchParams();
 
   // Fetch all buy properties from API
-  const { data: allBuyProperties, loading } = useApi(
-    () => propertyApi.getPropertiesByType("buy"),
-    [],
-    [],
-  );
+  const { data: allBuyProperties, loading } = useApi(() => propertyApi.getPropertiesByType("buy"), [], [], "buy_properties");
 
   /* Read URL query params on mount (from homepage search) */
   useEffect(() => {

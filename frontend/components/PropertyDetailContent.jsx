@@ -11,11 +11,7 @@ import useApi from "@/lib/useApi";
 
 export default function PropertyDetailContent({ slug }) {
   const { user, isAuthenticated } = useAuth();
-  const { data: property, loading } = useApi(
-    () => propertyApi.getPropertyBySlug(slug),
-    [slug],
-    null,
-  );
+  const { data: property, loading } = useApi(() => propertyApi.getPropertyBySlug(slug), [slug], null, `property_${slug}`);
 
   const [buyModal, setBuyModal] = useState(false);
   const [contactModal, setContactModal] = useState(false);

@@ -10,11 +10,7 @@ import useApi from "@/lib/useApi";
 
 export default function AgentsPage() {
   const shouldReduceMotion = useReducedMotion();
-  const { data: agents, loading } = useApi(
-    () => agentApi.getAgents(),
-    [],
-    [],
-  );
+  const { data: agents, loading } = useApi(() => agentApi.getAgents(), [], [], "agents");
 
   return (
     <section className="min-h-screen bg-surface">
