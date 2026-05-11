@@ -12,6 +12,7 @@ export default function FeaturedProperties({ hideTitle = false }) {
     () => propertyApi.getFeaturedProperties(),
     [],
     [],
+    "featured-properties" // Bolt: Cache API call to avoid unnecessary layout shifts and fetches
   );
 
   // Map API/mock shape → PropertyCard shape
