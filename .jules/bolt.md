@@ -1,0 +1,3 @@
+## 2024-05-13 - [Caching client-side API fetches]
+**Learning:** Client-side API fetching is centralized in the `useApi` hook (`frontend/lib/useApi.js`), which lacks caching. Frequent navigation between pages like Rent, Buy, and Agents caused redundant API calls for static data.
+**Action:** Implemented an in-memory SWR (Stale-While-Revalidate) cache via a `cacheKey` parameter in `useApi` to prevent redundant fetching, ensuring immediate render of cached data while refetching in the background. To properly handle dynamic route changes without unmounting components when using the `useApi` hook, the `cacheKey` updates must be managed by deriving state from props during render (e.g., checking `if (cacheKey !== currentCacheKey)`).
