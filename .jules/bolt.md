@@ -1,0 +1,3 @@
+## 2025-02-20 - [SWR Caching Strategy in useApi]
+**Learning:** The previous implementation of `useApi` caused redundant network requests when switching between routes displaying identical data sets (e.g. going back and forth to buy/rent/featured properties), which caused layout shifts and slow navigation since we didn't implement an SWR caching approach correctly with in-memory map.
+**Action:** Implemented an in-memory SWR (Stale-While-Revalidate) caching mechanism inside `frontend/lib/useApi.js` leveraging `cacheKey`. Ensure that cache presence checks determine loading states, avoiding empty fallback pitfalls during route transitions. We can now add `cacheKey` argument to any `useApi` call.
