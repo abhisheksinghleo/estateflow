@@ -1,0 +1,3 @@
+## 2024-05-18 - SWR Caching in `useApi`
+**Learning:** When implementing or modifying cache invalidation in the `useApi` hook for an in-memory SWR (Stale-While-Revalidate) cache, you must ensure the React state is fully synchronized during render. Relying solely on `useEffect` or initial state will lead to bugs (e.g. infinite render loops or fallbacks incorrectly interpreted as truthy). State derivation from props during render (e.g. checking `cacheKey !== currentCacheKey`) and explicit cache checks (`apiCache.has(cacheKey)`) rather than falsy values are critical for stability.
+**Action:** Always derive cache state during the initial render phase and pass explicit string cache keys from the caller components when implementing SWR caching in custom React hooks.
