@@ -1,0 +1,3 @@
+## 2023-11-23 - SWR Caching in `useApi`
+**Learning:** In a codebase using a centralized custom API hook (`useApi`), implementing an in-memory cache with Stale-While-Revalidate (SWR) patterns provides a significant performance boost by eliminating redundant loading states when navigating between previously fetched views. Synchronizing the React state during the render cycle (`if (cacheKey !== currentCacheKey)`) prevents issues when navigating dynamic routes without unmounting.
+**Action:** When adding caching to React hooks that might be used in dynamic routes, ensure the cache state is derived during render, and `cacheKey` dependencies are properly added to the internal fetch callbacks.
