@@ -71,6 +71,7 @@ function RentPageContent() {
     () => propertyApi.getPropertiesByType("rent"),
     [],
     [],
+    "properties-rent"
   );
 
   /* Read URL query params on mount (from homepage search) */
