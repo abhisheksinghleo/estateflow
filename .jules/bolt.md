@@ -1,0 +1,3 @@
+## 2024-05-21 - Cache Invalidation Edge Cases in `useApi`
+**Learning:** When implementing an in-memory cache in a React hook (`useApi`), relying on `!initialData` to set the `loading` state causes bugs when fallbacks are valid truthy/empty arrays. Additionally, dynamic route shifts reuse component instances, making `cacheKey` updates fail if not explicitly derived during render (rather than waiting for a `useEffect`).
+**Action:** Always use explicit cache presence checks (`apiCache.has(cacheKey)`) for loading states instead of data truthiness. Ensure cache keys are explicitly managed and synchronized via derived state during render to avoid stale cache lookups.
