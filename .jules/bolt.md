@@ -1,0 +1,3 @@
+## 2024-05-22 - [Add SWR Caching to useApi hook]
+**Learning:** Client-side API fetching in React components can cause unnecessary redundant requests on route changes if no caching mechanism is provided.
+**Action:** Implemented a simple in-memory SWR (Stale-While-Revalidate) cache within the custom `useApi` hook. By adding a `cacheKey` parameter, we can reuse previously fetched data instantly, eliminating loading flashes, and refetch in the background to ensure data is fresh. We ensure React state is fully synchronized during render and avoid using `fallback` in the `useEffect` dependency array.

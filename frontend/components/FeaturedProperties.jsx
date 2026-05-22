@@ -12,6 +12,7 @@ export default function FeaturedProperties({ hideTitle = false }) {
     () => propertyApi.getFeaturedProperties(),
     [],
     [],
+    "featuredProperties"
   );
 
   // Map API/mock shape → PropertyCard shape
