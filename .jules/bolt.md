@@ -1,0 +1,3 @@
+## 2024-05-18 - [SWR caching pattern with React Router]
+**Learning:** When implementing or modifying cache invalidation in the `useApi` hook, ensure the React state is fully synchronized during render. Use explicit cache presence checks (e.g., `apiCache.has(cacheKey)`) rather than relying on initial data (like `!initialData`) to determine the `loading` state, to avoid bugs when fallbacks are truthy empty arrays.
+**Action:** To properly handle dynamic route changes without unmounting components when using the `useApi` hook, the `cacheKey` updates must be managed by deriving state from props during render (e.g., checking `if (cacheKey !== currentCacheKey)`).
