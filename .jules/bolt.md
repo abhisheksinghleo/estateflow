@@ -1,0 +1,3 @@
+## 2024-06-12 - useApi In-Memory Cache Optimization
+**Learning:** Adding a simple in-memory Map cache to `useApi` dramatically improves UX for static/frequently-accessed list pages (Buy, Rent, Featured). The critical learning was that avoiding redundant loading spinners during React component transitions requires both synchronously deriving initial state from the cache on component mount, and returning early inside the `useCallback` fetch wrapper.
+**Action:** Always check the `useApi` cacheKey mechanism when adding new API calls, and remember to implement early return inside custom fetch hooks to actually save network bandwidth, rather than just masking the loading state.
