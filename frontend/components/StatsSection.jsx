@@ -31,6 +31,7 @@ export default function StatsSection() {
     () => statsApi.getStats(),
     [],
     fallbackStats,
+    "stats-overview"
   );
 
   const stats = (rawStats || fallbackStats).map(mapStat);
