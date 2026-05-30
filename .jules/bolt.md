@@ -1,0 +1,3 @@
+## 2024-05-18 - [useApi Hook Dynamic Route Synchronization]
+**Learning:** To properly handle dynamic route changes without unmounting components when using the `useApi` hook, the `cacheKey` updates must be managed by deriving state from props during render (e.g., checking `if (cacheKey !== currentCacheKey)`). Also, use explicit cache presence checks (`apiCache.has(cacheKey)`) rather than relying on initial data (like `!initialData`) to determine the `loading` state, to avoid bugs when fallbacks are truthy empty arrays.
+**Action:** Always derive state during render for dynamically changing props that manage cache/data instead of using `useEffect` which can cause stale data flickers, and explicitly verify cache hits using `.has()` maps instead of truthy evaluations.
