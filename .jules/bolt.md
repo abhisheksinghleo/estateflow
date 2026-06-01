@@ -1,0 +1,3 @@
+## 2024-06-01 - [useApi Hook Caching Pattern]
+**Learning:** The previous naive background refetch strategy resulted in redundant network requests. It's crucial for the `fetch` early-return cache hit to be tightly coupled directly with the React state (`apiCache.has(cacheKey)`) rather than depending on SWR backgrounds for static properties.
+**Action:** When implementing an in-memory cache in custom React hooks like `useApi`, ensure that the state derives directly from the cache key on render (using `cacheKey !== currentCacheKey` validation to avoid endless re-renders) and explicitly bypass the cache when users issue a force fetch (`refetch({force: true})`).
