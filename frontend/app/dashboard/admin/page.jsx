@@ -37,7 +37,7 @@ function AdminDashboardPageContent() {
   const { user } = useAuth();
 
   const isHeadAdmin = user?.role === "admin_head" || user?.role === "admin";
-  const { data: overview, loading: overviewLoading } = useApi(() => dashboardApi.getAdminOverview(), [], null);
+  const { data: overview, loading: overviewLoading } = useApi(() => dashboardApi.getAdminOverview(), [], null, "admin-overview");
   const { data: propertiesList, refetch: refetchProps } = useApi(() => propertyApi.getProperties(), [], []);
   const [allUsers, setAllUsers] = useState([]);
   const [coAdmins, setCoAdmins] = useState([]);
