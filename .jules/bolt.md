@@ -1,0 +1,3 @@
+## 2024-06-02 - Stale-While-Revalidate Caching for useApi
+**Learning:** Adding an SWR (Stale-While-Revalidate) mechanism to an in-memory cache in custom hooks like `useApi` allows for an instantaneous UI when rendering dynamic data without leaving it permanently stale. It is critical to provide a way to bypass this cache, so that when a component triggers an explicit `refetch()` it correctly fetches new data instead of instantly resolving with the old cached data.
+**Action:** When creating in-memory caches in React hooks, always implement SWR by falling back to cached state for the initial render, then trigger a background revalidation, and ensure the exposed `refetch` function forces a fetch over the network by passing options like `{ force: true }`.
