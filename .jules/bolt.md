@@ -1,0 +1,3 @@
+## 2024-05-18 - [SWR caching in useApi hook]
+**Learning:** React state updates during render (`if (cacheKey !== currentCacheKey)`) are necessary when caching data by route/slug to handle dynamic route changes without unmounting components. Using `useEffect` to sync the state would cause an extra render pass. Also, when returning a refetch method, explicitly force bypass the cache `fetch({ force: true })` so subsequent forced API calls actually fetch fresh data rather than hitting the new cache again.
+**Action:** When implementing or modifying an in-memory cache in a custom React hook (like `useApi`), ensure that React state is fully synchronized during render and the returned `refetch` function bypasses the cache explicitly.
