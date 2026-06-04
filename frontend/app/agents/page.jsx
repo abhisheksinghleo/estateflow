@@ -14,6 +14,7 @@ export default function AgentsPage() {
     () => agentApi.getAgents(),
     [],
     [],
+    "agent-directory"
   );
 
   return (
