@@ -74,10 +74,12 @@ function BuyPageContent() {
   const searchParams = useSearchParams();
 
   // Fetch all buy properties from API
+  // ⚡ Bolt: Provide cacheKey "buy-properties" to leverage SWR caching
   const { data: allBuyProperties, loading } = useApi(
     () => propertyApi.getPropertiesByType("buy"),
     [],
     [],
+    "buy-properties"
   );
 
   /* Read URL query params on mount (from homepage search) */
