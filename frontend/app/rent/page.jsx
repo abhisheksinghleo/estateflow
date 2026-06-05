@@ -67,10 +67,12 @@ function RentPageContent() {
   const searchParams = useSearchParams();
 
   // Fetch all rental properties from API
+  // ⚡ Bolt: Provide cacheKey "rent-properties" to leverage SWR caching
   const { data: rentProperties, loading } = useApi(
     () => propertyApi.getPropertiesByType("rent"),
     [],
     [],
+    "rent-properties"
   );
 
   /* Read URL query params on mount (from homepage search) */
