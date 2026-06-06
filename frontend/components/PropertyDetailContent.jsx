@@ -15,6 +15,7 @@ export default function PropertyDetailContent({ slug }) {
     () => propertyApi.getPropertyBySlug(slug),
     [slug],
     null,
+    `property_${slug}`
   );
 
   const [buyModal, setBuyModal] = useState(false);
