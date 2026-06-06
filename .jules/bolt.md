@@ -1,0 +1,3 @@
+## 2024-05-19 - Client-Side Caching with SWR
+**Learning:** The application uses a custom `useApi` hook to fetch data on the client side, causing repeated network requests and loading states when navigating between pages (e.g., from Home to Rent, or viewing properties).
+**Action:** Implemented a global in-memory `apiCache` within `useApi.js` and added a `cacheKey` parameter to support SWR (Stale-While-Revalidate). This allows immediate display of cached data while fetching fresh data in the background, significantly reducing perceived load times. Applied unique cache keys across all `useApi` call sites.
