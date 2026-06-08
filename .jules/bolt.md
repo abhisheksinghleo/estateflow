@@ -1,0 +1,3 @@
+## 2024-06-08 - [React Reconciliation and Inline Object Creation]
+**Learning:** In the property list pages (`BuyPage`, `RentPage`), passing an inline object (`property={{ ...property, city: ... }}`) inside a `.map()` loop during the render phase creates a new object identity on every single render. This forces child components like `PropertyCard` to re-render constantly, even if `React.memo` is used, because the props reference changes every time.
+**Action:** Always map complex objects before the render loop, preferably inside a `useMemo` hook, so they get a stable identity. Pair this with `React.memo` on the child list components to effectively prevent unnecessary re-renders in large lists.
