@@ -1,0 +1,3 @@
+## 2024-06-25 - React.memo() Defeated by Inline Objects in Lists
+**Learning:** Creating new inline object references (e.g. `{{ ...property, extraProp: true }}`) inside a `.map()` during JSX rendering defeats `React.memo()`. The child component receives a new prop reference on every render, causing it (and its expensive Framer Motion internals) to needlessly re-render even when the list data hasn't changed.
+**Action:** When mapping over lists to render complex or memoized child components, map the data beforehand inside a `useMemo` block so that the resulting array and the objects it contains maintain stable references between renders.

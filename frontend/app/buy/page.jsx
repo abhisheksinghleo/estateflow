@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect, useMemo, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import PropertyCard from "@/components/PropertyCard";
 import PropertyFilters from "@/components/PropertyFilters";
@@ -113,15 +113,31 @@ function BuyPageContent() {
     setActiveFilters(null);
   };
 
-  const filtered = applyFilters(allBuyProperties || [], activeFilters);
+  // Memoize the mapped objects first so object references are completely stable
+  // even if the user changes the sort order.
+  const mappedProperties = useMemo(() => {
+    return (allBuyProperties || []).map((property) => ({
+      ...property,
+      city: `${property.city}, ${property.state}`,
+      area: property.areaSqFt,
+      type: "Sale",
+      currency: property.currency || "USD",
+      listedByAgent: property.listedByAgent || false,
+    }));
+  }, [allBuyProperties]);
 
-  const sorted = [...filtered].sort((a, b) => {
-    if (sort === "price-low-high") return a.price - b.price;
-    if (sort === "price-high-low") return b.price - a.price;
-    if (sort === "newest") return b.id.localeCompare(a.id);
-    // recommended — featured first
-    return (b.featured ? 1 : 0) - (a.featured ? 1 : 0);
-  });
+  // Memoize the filtered and sorted list
+  const displayProperties = useMemo(() => {
+    const filtered = applyFilters(mappedProperties, activeFilters);
+
+    return [...filtered].sort((a, b) => {
+      if (sort === "price-low-high") return a.price - b.price;
+      if (sort === "price-high-low") return b.price - a.price;
+      if (sort === "newest") return b.id.localeCompare(a.id);
+      // recommended — featured first
+      return (b.featured ? 1 : 0) - (a.featured ? 1 : 0);
+    });
+  }, [mappedProperties, activeFilters, sort]);
 
   return (
     <section className="min-h-screen bg-surface">
@@ -174,9 +190,9 @@ function BuyPageContent() {
                   <>
                     Showing{" "}
                     <span className="font-semibold text-on-surface">
-                      {sorted.length}
+                      {displayProperties.length}
                     </span>{" "}
-                    buy listing{sorted.length !== 1 ? "s" : ""}
+                    buy listing{displayProperties.length !== 1 ? "s" : ""}
                     {activeFilters && (
                       <button
                         onClick={handleReset}
@@ -205,20 +221,10 @@ function BuyPageContent() {
               <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
                 <Skeleton variant="card" count={6} />
               </div>
-            ) : sorted.length > 0 ? (
+            ) : displayProperties.length > 0 ? (
               <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
-                {sorted.map((property) => (
-                  <PropertyCard
-                    key={property.id}
-                    property={{
-                      ...property,
-                      city: `${property.city}, ${property.state}`,
-                      area: property.areaSqFt,
-                      type: "Sale",
-                      currency: property.currency || "USD",
-                      listedByAgent: property.listedByAgent || false,
-                    }}
-                  />
+                {displayProperties.map((property) => (
+                  <PropertyCard key={property.id} property={property} />
                 ))}
               </div>
             ) : (
