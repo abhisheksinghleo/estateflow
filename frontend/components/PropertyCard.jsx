@@ -1,10 +1,13 @@
 "use client";
 
+import { memo } from "react";
 import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
 import { formatPrice } from "@/lib/api";
 
-export default function PropertyCard({ property }) {
+// ⚡ Bolt Optimization: Wrapped PropertyCard in React.memo()
+// Impact: Prevents expensive re-renders of list items when their data hasn't changed.
+const PropertyCard = memo(function PropertyCard({ property }) {
   const shouldReduceMotion = useReducedMotion();
 
   const {
@@ -122,4 +125,6 @@ export default function PropertyCard({ property }) {
       </div>
     </motion.article>
   );
-}
+});
+
+export default PropertyCard;
