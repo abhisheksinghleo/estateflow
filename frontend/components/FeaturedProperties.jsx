@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import Link from "next/link";
 import PropertyCard from "@/components/PropertyCard";
 import Skeleton from "@/components/Skeleton";
@@ -14,22 +15,26 @@ export default function FeaturedProperties({ hideTitle = false }) {
     [],
   );
 
+  // ⚡ Bolt Optimization: Memoized array mapping to avoid generating new object references on every render.
+  // Impact: Preserves prop identity for PropertyCard, enabling React.memo to correctly skip re-renders.
   // Map API/mock shape → PropertyCard shape
-  const featuredProperties = (rawFeatured || []).map((p) => ({
-    id: p.id,
-    slug: p.slug,
-    title: p.title,
-    city: p.state ? `${p.city}, ${p.state}` : p.city,
-    price: p.price,
-    currency: p.currency || "USD",
-    beds: p.beds,
-    baths: p.baths,
-    area: p.areaSqFt || p.area,
-    image: p.image,
-    type: p.listingType === "rent" ? "Rent" : "Sale",
-    featured: p.featured,
-    listedByAgent: p.listedByAgent || false,
-  }));
+  const featuredProperties = useMemo(() => {
+    return (rawFeatured || []).map((p) => ({
+      id: p.id,
+      slug: p.slug,
+      title: p.title,
+      city: p.state ? `${p.city}, ${p.state}` : p.city,
+      price: p.price,
+      currency: p.currency || "USD",
+      beds: p.beds,
+      baths: p.baths,
+      area: p.areaSqFt || p.area,
+      image: p.image,
+      type: p.listingType === "rent" ? "Rent" : "Sale",
+      featured: p.featured,
+      listedByAgent: p.listedByAgent || false,
+    }));
+  }, [rawFeatured]);
 
   return (
     <div className={hideTitle ? "" : "mx-auto max-w-7xl px-6 py-14 lg:px-8"}>
