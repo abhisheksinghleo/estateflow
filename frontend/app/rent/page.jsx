@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect, Suspense, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import PropertyCard from "@/components/PropertyCard";
 import PropertyFilters from "@/components/PropertyFilters";
@@ -106,14 +106,33 @@ function RentPageContent() {
     setActiveFilters(null);
   };
 
-  const filtered = applyFilters(rentProperties || [], activeFilters);
+  const filteredAndMapped = useMemo(() => {
+    const rawFiltered = applyFilters(rentProperties || [], activeFilters);
+    return rawFiltered.map((property) => ({
+      id: property.id,
+      slug: property.slug,
+      title: property.title,
+      city: `${property.city}, ${property.state}`,
+      price: property.price,
+      currency: property.currency || "USD",
+      beds: property.beds,
+      baths: property.baths,
+      area: property.areaSqFt,
+      image: property.image,
+      type: "Rent",
+      featured: property.featured,
+      listedByAgent: property.listedByAgent || false,
+    }));
+  }, [rentProperties, activeFilters]);
 
-  const sorted = [...filtered].sort((a, b) => {
-    if (sort === "priceLowHigh") return a.price - b.price;
-    if (sort === "priceHighLow") return b.price - a.price;
-    if (sort === "beds") return b.beds - a.beds;
-    return 0; // newest — already ordered
-  });
+  const sorted = useMemo(() => {
+    return [...filteredAndMapped].sort((a, b) => {
+      if (sort === "priceLowHigh") return a.price - b.price;
+      if (sort === "priceHighLow") return b.price - a.price;
+      if (sort === "beds") return b.beds - a.beds;
+      return 0; // newest — already ordered
+    });
+  }, [filteredAndMapped, sort]);
 
   return (
     <section className="min-h-screen bg-surface">
@@ -202,21 +221,7 @@ function RentPageContent() {
                 {sorted.map((property) => (
                   <PropertyCard
                     key={property.id}
-                    property={{
-                      id: property.id,
-                      slug: property.slug,
-                      title: property.title,
-                      city: `${property.city}, ${property.state}`,
-                      price: property.price,
-                      currency: property.currency || "USD",
-                      beds: property.beds,
-                      baths: property.baths,
-                      area: property.areaSqFt,
-                      image: property.image,
-                      type: "Rent",
-                      featured: property.featured,
-                      listedByAgent: property.listedByAgent || false,
-                    }}
+                    property={property}
                   />
                 ))}
               </div>
