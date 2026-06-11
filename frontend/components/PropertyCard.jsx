@@ -1,10 +1,11 @@
 "use client";
 
+import { memo } from "react";
 import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
 import { formatPrice } from "@/lib/api";
 
-export default function PropertyCard({ property }) {
+const PropertyCard = memo(function PropertyCard({ property }) {
   const shouldReduceMotion = useReducedMotion();
 
   const {
@@ -122,4 +123,6 @@ export default function PropertyCard({ property }) {
       </div>
     </motion.article>
   );
-}
+});
+
+export default PropertyCard;

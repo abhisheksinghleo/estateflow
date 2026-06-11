@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect, Suspense, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import PropertyCard from "@/components/PropertyCard";
 import PropertyFilters from "@/components/PropertyFilters";
@@ -113,15 +113,27 @@ function BuyPageContent() {
     setActiveFilters(null);
   };
 
-  const filtered = applyFilters(allBuyProperties || [], activeFilters);
+  const filteredAndMapped = useMemo(() => {
+    const rawFiltered = applyFilters(allBuyProperties || [], activeFilters);
+    return rawFiltered.map((property) => ({
+      ...property,
+      city: `${property.city}, ${property.state}`,
+      area: property.areaSqFt,
+      type: "Sale",
+      currency: property.currency || "USD",
+      listedByAgent: property.listedByAgent || false,
+    }));
+  }, [allBuyProperties, activeFilters]);
 
-  const sorted = [...filtered].sort((a, b) => {
-    if (sort === "price-low-high") return a.price - b.price;
-    if (sort === "price-high-low") return b.price - a.price;
-    if (sort === "newest") return b.id.localeCompare(a.id);
-    // recommended — featured first
-    return (b.featured ? 1 : 0) - (a.featured ? 1 : 0);
-  });
+  const sorted = useMemo(() => {
+    return [...filteredAndMapped].sort((a, b) => {
+      if (sort === "price-low-high") return a.price - b.price;
+      if (sort === "price-high-low") return b.price - a.price;
+      if (sort === "newest") return b.id.localeCompare(a.id);
+      // recommended — featured first
+      return (b.featured ? 1 : 0) - (a.featured ? 1 : 0);
+    });
+  }, [filteredAndMapped, sort]);
 
   return (
     <section className="min-h-screen bg-surface">
@@ -210,14 +222,7 @@ function BuyPageContent() {
                 {sorted.map((property) => (
                   <PropertyCard
                     key={property.id}
-                    property={{
-                      ...property,
-                      city: `${property.city}, ${property.state}`,
-                      area: property.areaSqFt,
-                      type: "Sale",
-                      currency: property.currency || "USD",
-                      listedByAgent: property.listedByAgent || false,
-                    }}
+                    property={property}
                   />
                 ))}
               </div>
