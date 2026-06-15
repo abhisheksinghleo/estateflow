@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import InquiryForm from "@/components/InquiryForm";
 import MortgageCalculator from "@/components/MortgageCalculator";
 import Skeleton from "@/components/Skeleton";
@@ -135,7 +136,17 @@ export default function PropertyDetailContent({ slug }) {
 
         <section className="grid gap-6 lg:grid-cols-[1.35fr,1fr]">
           <div className="overflow-hidden rounded-2xl bg-surface-container-lowest shadow-ambient">
-            <img src={property.image} alt={property.title} className="h-72 w-full object-cover sm:h-96" />
+            {/* ⚡ Bolt Optimization: Utilizing Next.js <Image priority> for the hero image to prevent layout shifts, ensure immediate loading, and optimize image format for faster LCP. */}
+            <div className="relative h-72 w-full sm:h-96">
+              <Image
+                src={property.image}
+                alt={property.title}
+                fill
+                priority
+                className="object-cover"
+                sizes="(max-width: 1024px) 100vw, 60vw"
+              />
+            </div>
             <div className="space-y-5 p-6">
               {/* Badges */}
               <div className="flex flex-wrap items-center gap-2">

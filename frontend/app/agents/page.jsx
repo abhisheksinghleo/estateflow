@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { motion, useReducedMotion } from "framer-motion";
 import FadeIn from "@/components/animations/FadeIn";
 import Skeleton from "@/components/Skeleton";
@@ -54,15 +55,21 @@ export default function AgentsPage() {
                       : { y: -4, transition: { type: "spring", stiffness: 300, damping: 25 } }
                   }
                 >
-                  <div className="relative overflow-hidden">
-                    <motion.img
-                      src={agent.image}
-                      alt={agent.name}
-                      className="h-56 w-full object-cover"
-                      loading="lazy"
+                  {/* ⚡ Bolt Optimization: Migrated to Next.js <Image> wrapped in a motion.div. This provides automatic image optimization and lazy loading, reducing total page weight on load. */}
+                  <div className="relative overflow-hidden h-56 w-full">
+                    <motion.div
+                      className="relative h-full w-full"
                       whileHover={shouldReduceMotion ? {} : { scale: 1.04 }}
                       transition={{ duration: 0.6, ease: "easeOut" }}
-                    />
+                    >
+                      <Image
+                        src={agent.image}
+                        alt={agent.name}
+                        fill
+                        className="object-cover"
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+                      />
+                    </motion.div>
                   </div>
                   <div className="space-y-3 p-5">
                     <div>
