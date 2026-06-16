@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { motion, useReducedMotion } from "framer-motion";
 import FadeIn from "@/components/animations/FadeIn";
 import { StaggerContainer, StaggerItem } from "@/components/animations/StaggerReveal";
@@ -58,10 +59,14 @@ export default function AboutPage() {
           animate={{ scale: 1 }}
           transition={{ duration: 10, ease: [0.25, 0.46, 0.45, 0.94] }}
         >
-          <img
+          {/* ⚡ Bolt Optimization: Use next/image with priority for hero image LCP */}
+          <Image
             src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?q=80&w=2675&auto=format&fit=crop"
             alt="Real Estate Exterior"
-            className="h-full w-full object-cover opacity-30"
+            fill
+            priority
+            sizes="100vw"
+            className="object-cover opacity-30"
           />
         </motion.div>
         <div className="absolute inset-0 bg-gradient-to-t from-on-surface via-on-surface/60 to-transparent z-[1]" />
@@ -137,14 +142,17 @@ export default function AboutPage() {
           <div className="space-y-8">
             <FadeIn direction="right" delay={0.1}>
               <motion.div
-                className="overflow-hidden rounded-3xl shadow-ambient-lg"
+                className="relative h-[450px] w-full overflow-hidden rounded-3xl shadow-ambient-lg"
                 whileHover={shouldReduceMotion ? {} : { scale: 1.01 }}
                 transition={{ duration: 0.5, ease: "easeOut" }}
               >
-                <img
+                {/* ⚡ Bolt Optimization: Replace native img with next/image for automatic sizing/formatting */}
+                <Image
                   src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=2070&q=80"
                   alt="Home Exterior"
-                  className="w-full h-[450px] object-cover"
+                  fill
+                  sizes="(max-width: 768px) 100vw, 50vw"
+                  className="object-cover"
                 />
               </motion.div>
             </FadeIn>
