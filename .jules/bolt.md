@@ -1,0 +1,3 @@
+## 2024-05-24 - Migrating Framer Motion images to Next.js Image
+**Learning:** When preserving Framer Motion animations during a migration from native `<img>` to Next.js `<Image>`, you must wrap the `<Image />` component in a `<motion.div>` instead of trying to apply motion directly to the Next.js image wrapper (e.g., avoid `<motion.img>`). Additionally, when migrating an `onError` fallback handler, explicitly clearing `e.target.srcset` (e.g., `e.target.srcset = ""`) is required because browsers prioritize the automatically generated `srcset` over `src`, causing fallback images to fail to display.
+**Action:** Always wrap `next/image` in a `<motion.div>` when combining with Framer Motion, and explicitly clear `srcset` in `onError` handlers when defining fallback images.
