@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { motion, useReducedMotion } from "framer-motion";
 
 const textVariants = {
@@ -34,10 +35,13 @@ export default function HeroSection() {
         animate={{ scale: 1 }}
         transition={{ duration: 12, ease: [0.25, 0.46, 0.45, 0.94] }}
       >
-        <img
+        <Image
           src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1920&q=80"
           alt="Modern luxury home at golden hour"
-          className="h-full w-full object-cover"
+          fill
+          priority
+          sizes="100vw"
+          className="object-cover"
         />
       </motion.div>
 
