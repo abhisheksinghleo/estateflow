@@ -1,0 +1,3 @@
+## 2024-06-19 - Optimizing Next.js Images with Framer Motion
+**Learning:** When trying to apply Framer Motion animations to a Next.js optimized `<Image>`, applying the motion tag directly (e.g. `<motion.Image>`) or trying to map the Next.js wrapper can cause layout thrashing or animation failures. The correct approach is to wrap the Next.js `<Image />` component with a `<motion.div>` that contains the positioning (like `absolute inset-0`) and pass `fill` and `className="object-cover"` to the `<Image>` inside it.
+**Action:** Always wrap Next.js `<Image>` components in a parent `<motion.div>` for parallax, scaling, or other transitions instead of animating the image component itself.
