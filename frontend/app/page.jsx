@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { motion, useReducedMotion } from "framer-motion";
 import HeroSection from "@/components/HeroSection";
@@ -112,16 +113,19 @@ export default function HomePage() {
           <div className="grid gap-16 lg:grid-cols-2 lg:items-center">
             {/* Image — overlaps the text column per "Intentional Asymmetry" */}
             <FadeIn direction="left">
+              {/* ⚡ Bolt: Added `relative` and explicit height for `next/image` with `fill` to work within framer-motion */}
               <div className="relative">
                 <motion.div
-                  className="overflow-hidden rounded-3xl shadow-ambient-lg"
+                  className="relative h-[480px] w-full overflow-hidden rounded-3xl shadow-ambient-lg"
                   whileHover={shouldReduceMotion ? {} : { scale: 1.01 }}
                   transition={{ duration: 0.5, ease: "easeOut" }}
                 >
-                  <img
+                  <Image
                     src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1200&q=80"
                     alt="Beautiful exterior of a modern home"
-                    className="h-[480px] w-full object-cover"
+                    fill
+                    sizes="(max-width: 768px) 100vw, 50vw"
+                    className="object-cover"
                   />
                 </motion.div>
                 {/* Floating accent card (Intentional Asymmetry) */}
