@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { motion, useReducedMotion } from "framer-motion";
 
 const textVariants = {
@@ -28,16 +29,19 @@ export default function HeroSection() {
   return (
     <section className="relative min-h-[92vh] w-full overflow-hidden bg-surface-container-low">
       {/* Ken Burns Background */}
+      {/* ⚡ Bolt: Using next/image for critical LCP hero image with priority and proper Next.js optimization */}
       <motion.div
         className="absolute inset-0 z-0"
         initial={shouldReduceMotion ? {} : { scale: 1.1 }}
         animate={{ scale: 1 }}
         transition={{ duration: 12, ease: [0.25, 0.46, 0.45, 0.94] }}
       >
-        <img
+        <Image
           src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1920&q=80"
           alt="Modern luxury home at golden hour"
-          className="h-full w-full object-cover"
+          fill
+          priority
+          className="object-cover"
         />
       </motion.div>
 
