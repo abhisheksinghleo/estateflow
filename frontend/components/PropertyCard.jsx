@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { motion, useReducedMotion } from "framer-motion";
 import { formatPrice } from "@/lib/api";
 
@@ -36,19 +37,28 @@ export default function PropertyCard({ property }) {
     >
       {/* Image */}
       <div className="relative aspect-[4/3] overflow-hidden">
-        <motion.img
-          src={image}
-          alt={title}
-          className="h-full w-full object-cover"
-          loading="lazy"
+        {/* ⚡ Bolt Optimization: Replace native <img> with next/image for automatic optimization (WebP/AVIF, resizing, lazy loading). We wrap it in a motion.div to preserve Framer Motion animations cleanly. */}
+        <motion.div
+          className="relative h-full w-full"
           whileHover={shouldReduceMotion ? {} : { scale: 1.04 }}
           transition={{ duration: 0.6, ease: "easeOut" }}
-          onError={(e) => {
-            e.target.onerror = null;
-            e.target.style.background = "linear-gradient(135deg, #d4c4b0 0%, #a89279 50%, #8b7355 100%)";
-            e.target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300'%3E%3C/svg%3E";
-          }}
-        />
+        >
+          <Image
+            src={image}
+            alt={title}
+            fill
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            className="object-cover"
+            onError={(e) => {
+              e.target.onerror = null;
+              // ⚡ Bolt fix: Explicitly clear the generated srcset, otherwise the browser
+              // will prioritize the srcset over our fallback src
+              e.target.srcset = "";
+              e.target.style.background = "linear-gradient(135deg, #d4c4b0 0%, #a89279 50%, #8b7355 100%)";
+              e.target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300'%3E%3C/svg%3E";
+            }}
+          />
+        </motion.div>
         <div className="absolute inset-0 bg-gradient-to-t from-[#1b1c1c]/30 via-transparent to-transparent" />
 
         {/* Badges — using secondary-container per design system */}
