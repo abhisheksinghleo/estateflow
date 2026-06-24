@@ -1,0 +1,3 @@
+## 2024-05-24 - Next.js Image onError srcset Gotcha
+**Learning:** When migrating from native `<img>` to Next.js `<Image>` and preserving an `onError` fallback image handler, the fallback image might fail to display. Next.js `<Image>` generates a `srcset` automatically. Browsers prioritize `srcset` over the `src` attribute. If the `onError` handler only sets `e.target.src` to the fallback image, the browser will still try to use the broken paths from `srcset` resulting in the fallback not showing.
+**Action:** When migrating an `onError` fallback handler on `<Image>`, always explicitly clear the `srcset` (e.g., `e.target.srcset = ""`) within the `onError` function to ensure the fallback `src` is used.
