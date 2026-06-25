@@ -1,0 +1,3 @@
+## 2024-05-24 - Migrating Framer Motion img to Next.js Image
+**Learning:** When migrating a `<motion.img>` to a Next.js `<Image>` component, applying `motion` directly to the Next.js image wrapper (e.g. `<motion.Image>`) can cause layout rendering issues or strip animation properties. Additionally, when porting an `onError` fallback handler to `<Image>`, the browser will still prioritize the automatically generated Next.js `srcset` over the fallback `src`, causing the broken image to persist.
+**Action:** Always wrap the Next.js `<Image />` component inside a `<motion.div>` to preserve animations. When implementing an `onError` fallback on `<Image>`, explicitly clear `e.target.srcset = ""` so the browser loads the fallback `src` correctly.
