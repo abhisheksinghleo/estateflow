@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { motion, useReducedMotion } from "framer-motion";
 import FadeIn from "@/components/animations/FadeIn";
 import Skeleton from "@/components/Skeleton";
@@ -55,14 +56,19 @@ export default function AgentsPage() {
                   }
                 >
                   <div className="relative overflow-hidden">
-                    <motion.img
-                      src={agent.image}
-                      alt={agent.name}
-                      className="h-56 w-full object-cover"
-                      loading="lazy"
+                    <motion.div
+                      className="h-56 w-full relative"
                       whileHover={shouldReduceMotion ? {} : { scale: 1.04 }}
                       transition={{ duration: 0.6, ease: "easeOut" }}
-                    />
+                    >
+                      <Image
+                        src={agent.image}
+                        alt={agent.name}
+                        fill
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                        className="object-cover"
+                      />
+                    </motion.div>
                   </div>
                   <div className="space-y-3 p-5">
                     <div>
