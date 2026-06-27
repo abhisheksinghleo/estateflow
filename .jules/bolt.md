@@ -1,0 +1,3 @@
+## 2026-06-27 - Using Next.js Image with Framer Motion Layouts
+**Learning:** When using Next.js `next/image` with `fill` property inside `framer-motion` components (`<motion.div>`), the immediate parent component must have a positioned layout (e.g., `position: relative`, `absolute`, or `fixed`) and explicit dimensions (e.g., `h-[480px] w-full`). Otherwise, the layout will collapse or expand unexpectedly, causing visual rendering issues.
+**Action:** Always verify and enforce positioned layouts on the direct parent when applying the `fill` property to Next.js `Image` components during native `<img>` migrations.
