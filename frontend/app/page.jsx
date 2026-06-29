@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { motion, useReducedMotion } from "framer-motion";
 import HeroSection from "@/components/HeroSection";
@@ -114,14 +115,16 @@ export default function HomePage() {
             <FadeIn direction="left">
               <div className="relative">
                 <motion.div
-                  className="overflow-hidden rounded-3xl shadow-ambient-lg"
+                  className="relative h-[480px] overflow-hidden rounded-3xl shadow-ambient-lg"
                   whileHover={shouldReduceMotion ? {} : { scale: 1.01 }}
                   transition={{ duration: 0.5, ease: "easeOut" }}
                 >
-                  <img
+                  <Image
                     src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1200&q=80"
                     alt="Beautiful exterior of a modern home"
-                    className="h-[480px] w-full object-cover"
+                    fill
+                    sizes="(max-width: 1024px) 100vw, 50vw"
+                    className="object-cover"
                   />
                 </motion.div>
                 {/* Floating accent card (Intentional Asymmetry) */}
