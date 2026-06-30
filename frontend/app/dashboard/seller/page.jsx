@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/context/AuthContext";
 import { sellerApi, messageApi, notificationApi, authApi, purchaseApi, formatPrice, supportedCurrencies } from "@/lib/api";
@@ -238,7 +239,12 @@ export default function SellerDashboardPage() {
                   <div className="grid gap-4 sm:grid-cols-2">
                     {myProperties.map((p) => (
                       <div key={p.id} className="rounded-2xl bg-surface-container-lowest shadow-ambient overflow-hidden">
-                        {p.image && <img src={p.image} alt={p.title} className="w-full h-40 object-cover" />}
+                        {/* ⚡ Bolt Performance Optimization: Replaced native img with next/image for automatic optimization, lazy loading, and responsive sizing. */}
+                        {p.image && (
+                          <div className="relative w-full h-40">
+                            <Image src={p.image} fill alt={p.title} className="object-cover" sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" />
+                          </div>
+                        )}
                         <div className="p-4 space-y-3">
                           <div className="flex items-start justify-between">
                             <h3 className="font-semibold text-on-surface">{p.title}</h3>
