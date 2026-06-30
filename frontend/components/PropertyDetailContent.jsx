@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import InquiryForm from "@/components/InquiryForm";
 import MortgageCalculator from "@/components/MortgageCalculator";
 import Skeleton from "@/components/Skeleton";
@@ -135,7 +136,10 @@ export default function PropertyDetailContent({ slug }) {
 
         <section className="grid gap-6 lg:grid-cols-[1.35fr,1fr]">
           <div className="overflow-hidden rounded-2xl bg-surface-container-lowest shadow-ambient">
-            <img src={property.image} alt={property.title} className="h-72 w-full object-cover sm:h-96" />
+            {/* ⚡ Bolt Performance Optimization: Replaced native img with next/image for automatic optimization, lazy loading, and responsive sizing. The parent div uses relative positioning to support the 'fill' layout. priority={true} is added for LCP performance. */}
+            <div className="relative h-72 w-full sm:h-96">
+              <Image src={property.image} fill priority={true} alt={property.title} className="object-cover" sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" />
+            </div>
             <div className="space-y-5 p-6">
               {/* Badges */}
               <div className="flex flex-wrap items-center gap-2">

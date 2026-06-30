@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/context/AuthContext";
 import { dashboardApi, favoriteApi, authApi, purchaseApi, messageApi, notificationApi, formatPrice } from "@/lib/api";
@@ -203,7 +204,12 @@ export default function BuyerDashboardPage() {
                   <div className="grid gap-4 sm:grid-cols-2">
                     {favs.map((p) => (
                       <div key={p.id} className="rounded-2xl bg-surface-container-lowest shadow-ambient overflow-hidden">
-                        {p.image && <img src={p.image} alt={p.title} className="w-full h-40 object-cover" />}
+                        {/* ⚡ Bolt Performance Optimization: Replaced native img with next/image for automatic optimization, lazy loading, and responsive sizing. */}
+                        {p.image && (
+                          <div className="relative w-full h-40">
+                            <Image src={p.image} fill alt={p.title} className="object-cover" sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" />
+                          </div>
+                        )}
                         <div className="p-4 space-y-2">
                           <h3 className="font-semibold text-on-surface">{p.title}</h3>
                           <p className="text-sm text-on-surface-variant">{p.city}, {p.state}</p>
@@ -233,7 +239,12 @@ export default function BuyerDashboardPage() {
                   <div className="space-y-3">
                     {purchaseHistory.map((p) => (
                       <div key={p.id} className="rounded-2xl bg-surface-container-lowest p-4 shadow-ambient flex items-center gap-4">
-                        {p.propertyImage && <img src={p.propertyImage} alt="" className="w-16 h-16 rounded-xl object-cover" />}
+                        {/* ⚡ Bolt Performance Optimization: Replaced native img with next/image for automatic optimization. */}
+                        {p.propertyImage && (
+                          <div className="relative w-16 h-16 shrink-0">
+                            <Image src={p.propertyImage} fill alt="" className="object-cover rounded-xl" sizes="64px" />
+                          </div>
+                        )}
                         <div className="flex-1">
                           <p className="font-medium text-on-surface">{p.propertyTitle}</p>
                           <p className="text-xs text-on-surface-variant">{p.propertyCity} • {p.type === "buy_now" ? "Direct Purchase" : "Offer"} • {new Date(p.createdAt).toLocaleDateString()}</p>
