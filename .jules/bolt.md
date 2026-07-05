@@ -1,0 +1,3 @@
+## 2025-02-18 - Framer Motion & Next.js Image Integration
+**Learning:** Migrating from `<motion.img>` to Next.js `<Image>` requires wrapping the Next.js `<Image>` component inside a `<motion.div>` to preserve hover animations without breaking layout or Image properties. Also, when implementing an `onError` fallback for `<Image>`, explicitly clearing `e.target.srcset` is required, otherwise the browser will prioritize the generated `srcset` and the fallback `src` won't display.
+**Action:** Always wrap Next.js Image components in `<motion.div>` when animations are needed. Always clear `e.target.srcset` in `onError` handlers for Next.js Image components.
