@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { motion, useReducedMotion } from "framer-motion";
 import { formatPrice } from "@/lib/api";
 
@@ -34,21 +35,34 @@ export default function PropertyCard({ property }) {
           : { y: -4, transition: { type: "spring", stiffness: 300, damping: 25 } }
       }
     >
+      {/*
+        ⚡ Bolt Performance Optimization:
+        - What: Replaced native <motion.img> with Next.js <Image> wrapped in a <motion.div>.
+        - Why: Next.js Image component provides automatic image optimization, lazy loading, and modern formats like WebP, which native <img> lacks. Using `fill` and `sizes` ensures the browser downloads the correct image size.
+        - Impact: Reduces LCP (Largest Contentful Paint) and total bandwidth by serving optimized images tailored to viewport sizes.
+        - Measurement: Verify network tab for smaller image payload and WebP/AVIF format instead of original source format.
+      */}
       {/* Image */}
       <div className="relative aspect-[4/3] overflow-hidden">
-        <motion.img
-          src={image}
-          alt={title}
-          className="h-full w-full object-cover"
-          loading="lazy"
+        <motion.div
+          className="relative h-full w-full"
           whileHover={shouldReduceMotion ? {} : { scale: 1.04 }}
           transition={{ duration: 0.6, ease: "easeOut" }}
-          onError={(e) => {
-            e.target.onerror = null;
-            e.target.style.background = "linear-gradient(135deg, #d4c4b0 0%, #a89279 50%, #8b7355 100%)";
-            e.target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300'%3E%3C/svg%3E";
-          }}
-        />
+        >
+          <Image
+            src={image}
+            alt={title}
+            fill
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            className="object-cover"
+            onError={(e) => {
+              e.target.onerror = null;
+              e.target.srcset = "";
+              e.target.style.background = "linear-gradient(135deg, #d4c4b0 0%, #a89279 50%, #8b7355 100%)";
+              e.target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300'%3E%3C/svg%3E";
+            }}
+          />
+        </motion.div>
         <div className="absolute inset-0 bg-gradient-to-t from-[#1b1c1c]/30 via-transparent to-transparent" />
 
         {/* Badges — using secondary-container per design system */}
