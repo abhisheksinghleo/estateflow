@@ -1,0 +1,18 @@
+
+> real-estate-frontend@0.1.0 dev
+> next dev
+
+  ▲ Next.js 14.2.35
+  - Local:        http://localhost:3000
+
+ ✓ Starting...
+ ✓ Ready in 1542ms
+ ○ Compiling /rent ...
+ ✓ Compiled /rent in 12.5s (1440 modules)
+Missing Supabase environment variables
+ GET /rent 200 in 13362ms
+ ○ Compiling / ...
+ ✓ Compiled / in 1033ms (1456 modules)
+Missing Supabase environment variables
+ GET / 200 in 1262ms
+ GET / 200 in 52ms
