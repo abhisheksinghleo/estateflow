@@ -1,0 +1,3 @@
+## 2024-07-08 - Preserving Framer Motion Animations with next/image
+**Learning:** When migrating from native `<img>` to Next.js `<Image>`, trying to apply Framer Motion directly to the Next.js image wrapper (e.g., `<motion.Image>`) or its generated elements can break animations or layouts. Also, when handling `onError` fallbacks with `next/image`, direct DOM mutation (like setting `e.target.srcset = ""`) conflicts with Next.js's strict internal rendering and can result in blank spaces.
+**Action:** Always wrap the `<Image />` component in a standard `<motion.div>` instead of trying to animate the image component directly. When adding an `onError` fallback, manage the fallback source using React state (`useState`) rather than mutating DOM properties directly.
