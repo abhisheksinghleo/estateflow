@@ -1,0 +1,3 @@
+## 2024-05-17 - Next.js Image Optimization with Framer Motion
+**Learning:** When migrating from native `<img>` tags to Next.js `<Image>`, you cannot apply Framer Motion directly to the Next.js image wrapper (i.e., avoiding `<motion.img>`). Additionally, Next.js `<Image>` components have strict inline styling that conflicts with direct DOM mutation in `onError` callbacks.
+**Action:** Always wrap the Next.js `<Image />` component in a `<motion.div>` to preserve animations. Manage the fallback image source and error state using React state (`useState`) instead of direct DOM manipulation in `onError`.
