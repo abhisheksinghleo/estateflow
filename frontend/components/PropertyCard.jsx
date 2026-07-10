@@ -1,6 +1,8 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { motion, useReducedMotion } from "framer-motion";
 import { formatPrice } from "@/lib/api";
 
@@ -25,6 +27,15 @@ export default function PropertyCard({ property }) {
 
   const href = `/properties/${slug || id || "sample-property"}`;
 
+  const fallbackImg = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300'%3E%3Crect width='400' height='300' fill='%23a89279'/%3E%3C/svg%3E";
+  const [imgError, setImgError] = useState(false);
+
+  useEffect(() => {
+    setImgError(false);
+  }, [image]);
+
+  const finalImageSrc = imgError || !image ? fallbackImg : image;
+
   return (
     <motion.article
       className="group relative flex cursor-pointer flex-col overflow-hidden rounded-2xl bg-surface-container-lowest shadow-ambient transition-shadow duration-300 hover:shadow-ambient-lg"
@@ -35,21 +46,28 @@ export default function PropertyCard({ property }) {
       }
     >
       {/* Image */}
+      {/*
+        What: Replaced native <img> with Next.js <Image> wrapped in <motion.div>
+        Why: Leverage automatic image optimization, WebP format, and responsive sizes while keeping Framer Motion animations
+        Impact: Reduces LCP and image payload size significantly compared to native img tags
+        Measurement: Check Network tab for smaller image payloads and optimized formats (WebP/AVIF)
+      */}
       <div className="relative aspect-[4/3] overflow-hidden">
-        <motion.img
-          src={image}
-          alt={title}
-          className="h-full w-full object-cover"
-          loading="lazy"
+        <motion.div
+          className="h-full w-full relative"
           whileHover={shouldReduceMotion ? {} : { scale: 1.04 }}
           transition={{ duration: 0.6, ease: "easeOut" }}
-          onError={(e) => {
-            e.target.onerror = null;
-            e.target.style.background = "linear-gradient(135deg, #d4c4b0 0%, #a89279 50%, #8b7355 100%)";
-            e.target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300'%3E%3C/svg%3E";
-          }}
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#1b1c1c]/30 via-transparent to-transparent" />
+        >
+          <Image
+            src={finalImageSrc}
+            alt={title}
+            fill
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            className="object-cover"
+            onError={() => setImgError(true)}
+          />
+        </motion.div>
+        <div className="absolute inset-0 bg-gradient-to-t from-[#1b1c1c]/30 via-transparent to-transparent pointer-events-none" />
 
         {/* Badges — using secondary-container per design system */}
         <div className="absolute left-4 top-4 flex gap-2">
