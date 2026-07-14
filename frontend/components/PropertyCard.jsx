@@ -1,11 +1,22 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { motion, useReducedMotion } from "framer-motion";
 import { formatPrice } from "@/lib/api";
 
+/*
+ * ⚡ Bolt: Next.js Image Optimization with Framer Motion
+ * 💡 What: Replaced native `<motion.img>` with Next.js `<Image>` wrapped in `<motion.div>`. Uses React state for error fallback.
+ * 🎯 Why: Native `<img>` elements combined with Framer Motion skip Next.js's built-in image optimization. This caused full-resolution images to be served on initial load, drastically impacting LCP and memory. Direct DOM mutation for fallback handling also causes hydration errors or stale state.
+ * 📊 Impact: Significantly reduces image payload sizes through responsive sizing and format optimization (e.g. WebP/AVIF), improving load times and Core Web Vitals (specifically LCP).
+ * 🔬 Measurement: Observe image payload sizes in network tab and track LCP improvements in Lighthouse/Pagespeed Insights.
+ */
+
 export default function PropertyCard({ property }) {
   const shouldReduceMotion = useReducedMotion();
+  const [imgError, setImgError] = useState(false);
 
   const {
     id,
@@ -25,6 +36,13 @@ export default function PropertyCard({ property }) {
 
   const href = `/properties/${slug || id || "sample-property"}`;
 
+  useEffect(() => {
+    setImgError(false);
+  }, [image]);
+
+  const fallbackSrc = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300'%3E%3Crect width='100%25' height='100%25' fill='url(%23g)'/%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23d4c4b0'/%3E%3Cstop offset='50%25' stop-color='%23a89279'/%3E%3Cstop offset='100%25' stop-color='%238b7355'/%3E%3C/linearGradient%3E%3C/defs%3E%3C/svg%3E";
+  const currentSrc = imgError ? fallbackSrc : (image || fallbackSrc);
+
   return (
     <motion.article
       className="group relative flex cursor-pointer flex-col overflow-hidden rounded-2xl bg-surface-container-lowest shadow-ambient transition-shadow duration-300 hover:shadow-ambient-lg"
@@ -36,19 +54,20 @@ export default function PropertyCard({ property }) {
     >
       {/* Image */}
       <div className="relative aspect-[4/3] overflow-hidden">
-        <motion.img
-          src={image}
-          alt={title}
-          className="h-full w-full object-cover"
-          loading="lazy"
+        <motion.div
+          className="h-full w-full"
           whileHover={shouldReduceMotion ? {} : { scale: 1.04 }}
           transition={{ duration: 0.6, ease: "easeOut" }}
-          onError={(e) => {
-            e.target.onerror = null;
-            e.target.style.background = "linear-gradient(135deg, #d4c4b0 0%, #a89279 50%, #8b7355 100%)";
-            e.target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300'%3E%3C/svg%3E";
-          }}
-        />
+        >
+          <Image
+            src={currentSrc}
+            alt={title}
+            fill
+            className="object-cover"
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            onError={() => setImgError(true)}
+          />
+        </motion.div>
         <div className="absolute inset-0 bg-gradient-to-t from-[#1b1c1c]/30 via-transparent to-transparent" />
 
         {/* Badges — using secondary-container per design system */}
