@@ -1,0 +1,3 @@
+## 2025-02-28 - Next.js Image with Framer Motion
+**Learning:** When replacing native `<img>` tags with Next.js `<Image fill />`, the `<Image />` component must be placed inside a positioned container. If it is wrapped in a `<motion.div>` to preserve Framer Motion animations, the `<motion.div>` itself must be explicitly styled as `relative`. Otherwise, the image size is computed against the nearest positioned ancestor (often causing layout issues), and dynamically applying a transform on hover will alter the containing block and cause subtle visual jank.
+**Action:** Always ensure the immediate parent of a `<Image fill />` wrapper (like `<motion.div>`) has `position: relative` (e.g. `className="relative h-full w-full"`) to establish a stable containing block.
