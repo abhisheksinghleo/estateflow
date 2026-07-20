@@ -1,0 +1,3 @@
+## 2024-05-24 - Preserving Framer Motion with Next.js Image
+**Learning:** When migrating native `<img>` tags to Next.js `<Image fill />`, attempting to apply `framer-motion` properties directly to the Next.js component (`<motion.img>`) causes layout shifts and scaling issues because Next.js creates a containing wrapper.
+**Action:** Always wrap the Next.js `<Image fill />` inside a `<motion.div className="relative h-full w-full">`. This preserves the hover transforms (like `whileHover={{ scale: 1.04 }}`) without altering the absolute positioning behavior of the image or affecting siblings, provided the siblings are given explicit `z-index` classes (e.g. `z-10`, `z-20`).
