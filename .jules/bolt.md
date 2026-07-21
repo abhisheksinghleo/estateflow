@@ -1,0 +1,3 @@
+## 2024-05-17 - [Next.js Image External Source Fallbacks]
+**Learning:** When replacing native `<img>` tags with Next.js `<Image>` for external sources (like Unsplash), the local sandbox or environments without internet access will fail to optimize the image, leading to a broken LCP image if a fallback is not implemented. Direct DOM mutation cannot be used for `onError` handling on the Next.js `Image` component.
+**Action:** Use React state (`imgError`) to manage a boolean error flag, passing a dynamic `src` (and never an empty string or undefined) to the Next.js `<Image>`. Always reset the error flag in a `useEffect` when the source prop changes to avoid stale state.
