@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { motion, useReducedMotion } from "framer-motion";
 
 const textVariants = {
@@ -25,6 +26,13 @@ export default function HeroSection() {
   const shouldReduceMotion = useReducedMotion();
   const v = shouldReduceMotion ? lineReduced : lineUp;
 
+  // ⚡ BOLT PERFORMANCE OPTIMIZATION
+  // What: Replaced native <img> with Next.js <Image priority fill sizes="100vw" unoptimized={true} />.
+  // Why: Native <img> lacks preload hints and blocks LCP optimization. Unoptimized is required for external Unsplash images to prevent loading failures when Next.js external image domains aren't correctly configured.
+  // Impact: Improves Largest Contentful Paint (LCP) by preloading the hero image.
+  // Measurement: Verify faster LCP via Lighthouse/WebPageTest. Check DevTools Network tab for priority loading.
+  const heroSrc = "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1920&q=80";
+
   return (
     <section className="relative min-h-[92vh] w-full overflow-hidden bg-surface-container-low">
       {/* Ken Burns Background */}
@@ -34,10 +42,14 @@ export default function HeroSection() {
         animate={{ scale: 1 }}
         transition={{ duration: 12, ease: [0.25, 0.46, 0.45, 0.94] }}
       >
-        <img
-          src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1920&q=80"
+        <Image
+          src={heroSrc}
           alt="Modern luxury home at golden hour"
-          className="h-full w-full object-cover"
+          fill
+          priority
+          sizes="100vw"
+          unoptimized={true}
+          className="object-cover"
         />
       </motion.div>
 
