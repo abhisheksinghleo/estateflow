@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect, Suspense, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import PropertyCard from "@/components/PropertyCard";
 import PropertyFilters from "@/components/PropertyFilters";
@@ -113,15 +113,31 @@ function BuyPageContent() {
     setActiveFilters(null);
   };
 
-  const filtered = applyFilters(allBuyProperties || [], activeFilters);
+  /*
+   * ⚡ BOLT PERFORMANCE OPTIMIZATION
+   * What: Wrapped `filtered` array calculation in useMemo.
+   * Why: `applyFilters` executes a full array iteration with multiple conditions per item. Re-running this on every render (e.g. when `sort` state changes) is unnecessary work.
+   * Impact: Prevents expensive O(N) filtering operations on re-renders, reducing main thread blocking during sort operations.
+   * Measurement: React Profiler will show reduced render times for BuyPageContent when changing sort order.
+   */
+  const filtered = useMemo(() => applyFilters(allBuyProperties || [], activeFilters), [allBuyProperties, activeFilters]);
 
-  const sorted = [...filtered].sort((a, b) => {
-    if (sort === "price-low-high") return a.price - b.price;
-    if (sort === "price-high-low") return b.price - a.price;
-    if (sort === "newest") return b.id.localeCompare(a.id);
-    // recommended — featured first
-    return (b.featured ? 1 : 0) - (a.featured ? 1 : 0);
-  });
+  /*
+   * ⚡ BOLT PERFORMANCE OPTIMIZATION
+   * What: Wrapped `sorted` array calculation in useMemo.
+   * Why: Array sorting is O(N log N). Doing this on every render (e.g. if another state like a modal opens) causes unnecessary CPU cycles.
+   * Impact: Improves rendering performance by only sorting when the filtered list or the sort order actually changes.
+   * Measurement: React Profiler will show faster re-renders for the list component.
+   */
+  const sorted = useMemo(() => {
+    return [...filtered].sort((a, b) => {
+      if (sort === "price-low-high") return a.price - b.price;
+      if (sort === "price-high-low") return b.price - a.price;
+      if (sort === "newest") return b.id.localeCompare(a.id);
+      // recommended — featured first
+      return (b.featured ? 1 : 0) - (a.featured ? 1 : 0);
+    });
+  }, [filtered, sort]);
 
   return (
     <section className="min-h-screen bg-surface">
