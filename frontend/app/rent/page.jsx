@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect, Suspense, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import PropertyCard from "@/components/PropertyCard";
 import PropertyFilters from "@/components/PropertyFilters";
@@ -106,14 +106,26 @@ function RentPageContent() {
     setActiveFilters(null);
   };
 
-  const filtered = applyFilters(rentProperties || [], activeFilters);
+  // What: Wrap filtered array in useMemo
+  // Why: Prevent expensive array filtering on every re-render (O(n))
+  // Impact: Reduces CPU time during component updates that don't change filters or property data
+  // Measurement: Check React Profiler for reduced render duration when sorting changes
+  const filtered = useMemo(() => {
+    return applyFilters(rentProperties || [], activeFilters);
+  }, [rentProperties, activeFilters]);
 
-  const sorted = [...filtered].sort((a, b) => {
-    if (sort === "priceLowHigh") return a.price - b.price;
-    if (sort === "priceHighLow") return b.price - a.price;
-    if (sort === "beds") return b.beds - a.beds;
-    return 0; // newest — already ordered
-  });
+  // What: Wrap sorted array in useMemo
+  // Why: Prevent expensive array sorting on every re-render (O(n log n))
+  // Impact: Eliminates redundant sorting operations when other state changes
+  // Measurement: Verify faster sorting interactions in React Profiler
+  const sorted = useMemo(() => {
+    return [...filtered].sort((a, b) => {
+      if (sort === "priceLowHigh") return a.price - b.price;
+      if (sort === "priceHighLow") return b.price - a.price;
+      if (sort === "beds") return b.beds - a.beds;
+      return 0; // newest — already ordered
+    });
+  }, [filtered, sort]);
 
   return (
     <section className="min-h-screen bg-surface">
