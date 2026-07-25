@@ -1,0 +1,3 @@
+## 2024-06-25 - Client-Side Filtering Optimization
+**Learning:** Complex array operations like `filter` and `sort` on large datasets within React functional components can cause significant re-render latency if not memoized, particularly on listing pages like `/buy` and `/rent` where query params or other state updates can trigger frequent renders.
+**Action:** Always wrap complex client-side array filtering and sorting operations in `useMemo` hooks, specifying dependencies (like raw data list and active filters) to ensure they only recompute when necessary, preventing unnecessary O(n log n) recalculations.
