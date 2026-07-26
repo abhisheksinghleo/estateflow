@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect, Suspense, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import PropertyCard from "@/components/PropertyCard";
 import PropertyFilters from "@/components/PropertyFilters";
@@ -106,14 +106,22 @@ function RentPageContent() {
     setActiveFilters(null);
   };
 
-  const filtered = applyFilters(rentProperties || [], activeFilters);
+  // Memoize filtering to prevent O(N) array evaluation on every render.
+  // Reduces JS execution time during unrelated state updates.
+  const filtered = useMemo(() => {
+    return applyFilters(rentProperties || [], activeFilters);
+  }, [rentProperties, activeFilters]);
 
-  const sorted = [...filtered].sort((a, b) => {
-    if (sort === "priceLowHigh") return a.price - b.price;
-    if (sort === "priceHighLow") return b.price - a.price;
-    if (sort === "beds") return b.beds - a.beds;
-    return 0; // newest — already ordered
-  });
+  // Memoize sorting to prevent O(N log N) evaluation on every render.
+  // Sort is only recalculated when the underlying list or sort direction changes.
+  const sorted = useMemo(() => {
+    return [...filtered].sort((a, b) => {
+      if (sort === "priceLowHigh") return a.price - b.price;
+      if (sort === "priceHighLow") return b.price - a.price;
+      if (sort === "beds") return b.beds - a.beds;
+      return 0; // newest — already ordered
+    });
+  }, [filtered, sort]);
 
   return (
     <section className="min-h-screen bg-surface">
