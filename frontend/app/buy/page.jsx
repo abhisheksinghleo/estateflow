@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect, Suspense, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import PropertyCard from "@/components/PropertyCard";
 import PropertyFilters from "@/components/PropertyFilters";
@@ -113,15 +113,26 @@ function BuyPageContent() {
     setActiveFilters(null);
   };
 
-  const filtered = applyFilters(allBuyProperties || [], activeFilters);
+  /*
+   * ⚡ BOLT OPTIMIZATION: Memoize list filtering and sorting
+   * What: Wrapped applyFilters and sort logic in useMemo hooks.
+   * Why: Prevents expensive array iterations (O(n) for filter, O(n log n) for sort) on every render, especially when typed in SearchBar or toggling non-filter state.
+   * Impact: Reduces CPU main-thread blocking time during re-renders, making the UI feel significantly more responsive when the list is large.
+   * Measurement: React Profiler will show reduced render time for BuyPageContent when state unrelated to filtering/sorting changes.
+   */
+  const filtered = useMemo(() => {
+    return applyFilters(allBuyProperties || [], activeFilters);
+  }, [allBuyProperties, activeFilters]);
 
-  const sorted = [...filtered].sort((a, b) => {
-    if (sort === "price-low-high") return a.price - b.price;
-    if (sort === "price-high-low") return b.price - a.price;
-    if (sort === "newest") return b.id.localeCompare(a.id);
-    // recommended — featured first
-    return (b.featured ? 1 : 0) - (a.featured ? 1 : 0);
-  });
+  const sorted = useMemo(() => {
+    return [...filtered].sort((a, b) => {
+      if (sort === "price-low-high") return a.price - b.price;
+      if (sort === "price-high-low") return b.price - a.price;
+      if (sort === "newest") return b.id.localeCompare(a.id);
+      // recommended — featured first
+      return (b.featured ? 1 : 0) - (a.featured ? 1 : 0);
+    });
+  }, [filtered, sort]);
 
   return (
     <section className="min-h-screen bg-surface">
