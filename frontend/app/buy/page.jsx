@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect, Suspense, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import PropertyCard from "@/components/PropertyCard";
 import PropertyFilters from "@/components/PropertyFilters";
@@ -113,15 +113,22 @@ function BuyPageContent() {
     setActiveFilters(null);
   };
 
-  const filtered = applyFilters(allBuyProperties || [], activeFilters);
+  /*
+   * ⚡ BOLT OPTIMIZATION
+   * What: Memoized the client-side filtering and sorting of the properties array using useMemo.
+   * Why: Prevents expensive array filter and sort operations from running on every component re-render (e.g. when state other than properties or filters changes).
+   * Impact: Eliminates O(n) filtering and O(n log n) sorting executions during unrelated re-renders, lowering main thread blocking and ensuring smoother interaction.
+   * Measurement: Monitor React DevTools profiler to verify reduced component render times and skipping of array processing loops when filters remain unchanged.
+   */
+  const filtered = useMemo(() => applyFilters(allBuyProperties || [], activeFilters), [allBuyProperties, activeFilters]);
 
-  const sorted = [...filtered].sort((a, b) => {
+  const sorted = useMemo(() => [...filtered].sort((a, b) => {
     if (sort === "price-low-high") return a.price - b.price;
     if (sort === "price-high-low") return b.price - a.price;
     if (sort === "newest") return b.id.localeCompare(a.id);
     // recommended — featured first
     return (b.featured ? 1 : 0) - (a.featured ? 1 : 0);
-  });
+  }), [filtered, sort]);
 
   return (
     <section className="min-h-screen bg-surface">
