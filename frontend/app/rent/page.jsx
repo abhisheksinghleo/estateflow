@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect, Suspense, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import PropertyCard from "@/components/PropertyCard";
 import PropertyFilters from "@/components/PropertyFilters";
@@ -106,14 +106,22 @@ function RentPageContent() {
     setActiveFilters(null);
   };
 
-  const filtered = applyFilters(rentProperties || [], activeFilters);
-
-  const sorted = [...filtered].sort((a, b) => {
-    if (sort === "priceLowHigh") return a.price - b.price;
-    if (sort === "priceHighLow") return b.price - a.price;
-    if (sort === "beds") return b.beds - a.beds;
-    return 0; // newest — already ordered
-  });
+  /*
+   * ⚡ Bolt Performance Optimization:
+   * What: Wrapped applyFilters and sort in a useMemo hook.
+   * Why: Prevents O(n log n) sorting and filtering of potentially large property arrays on every render.
+   * Impact: Significantly reduces CPU time during re-renders when sorting/filtering logic hasn't changed.
+   * Measurement: Monitor component render times in React DevTools Profiler.
+   */
+  const sorted = useMemo(() => {
+    const filtered = applyFilters(rentProperties || [], activeFilters);
+    return [...filtered].sort((a, b) => {
+      if (sort === "priceLowHigh") return a.price - b.price;
+      if (sort === "priceHighLow") return b.price - a.price;
+      if (sort === "beds") return b.beds - a.beds;
+      return 0; // newest — already ordered
+    });
+  }, [rentProperties, activeFilters, sort]);
 
   return (
     <section className="min-h-screen bg-surface">
