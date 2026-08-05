@@ -1,0 +1,3 @@
+## 2024-08-05 - Avoid Unnecessary Client-Side Array Processing During Re-Renders
+**Learning:** React components (like BuyPage and RentPage) that filter and sort large arrays (like property listings) directly in the render body will recalculate the entire array on every single re-render, even if the underlying data or filter conditions haven't changed. This is an O(n log n) overhead added to every component state update.
+**Action:** Always wrap heavy data processing operations (like filtering and sorting arrays based on multiple criteria) with `useMemo`, with strict dependency arrays ensuring it only re-computes when data or active filters actually change.
