@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect, Suspense, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import PropertyCard from "@/components/PropertyCard";
 import PropertyFilters from "@/components/PropertyFilters";
@@ -106,14 +106,19 @@ function RentPageContent() {
     setActiveFilters(null);
   };
 
-  const filtered = applyFilters(rentProperties || [], activeFilters);
-
-  const sorted = [...filtered].sort((a, b) => {
-    if (sort === "priceLowHigh") return a.price - b.price;
-    if (sort === "priceHighLow") return b.price - a.price;
-    if (sort === "beds") return b.beds - a.beds;
-    return 0; // newest — already ordered
-  });
+  // What: Memoized complex filtering and sorting logic
+  // Why: Prevents expensive array operations on every component render (e.g. when typing in an unrelated input)
+  // Impact: O(N) filtering and O(N log N) sorting only runs when dependencies actually change
+  // Measurement: React Profiler will show reduced render time when interacting with non-filter UI elements
+  const sorted = useMemo(() => {
+    const filtered = applyFilters(rentProperties || [], activeFilters);
+    return [...filtered].sort((a, b) => {
+      if (sort === "priceLowHigh") return a.price - b.price;
+      if (sort === "priceHighLow") return b.price - a.price;
+      if (sort === "beds") return b.beds - a.beds;
+      return 0; // newest — already ordered
+    });
+  }, [rentProperties, activeFilters, sort]);
 
   return (
     <section className="min-h-screen bg-surface">
