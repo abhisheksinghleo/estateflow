@@ -1,0 +1,3 @@
+## 2025-05-18 - Client-Side Filtering Optimization
+**Learning:** Found complex client-side array filtering and sorting operations happening on every render in Next.js/React list views, which blocks the main thread.
+**Action:** Wrapped the filter and sort logic in a `useMemo` hook, referencing only relevant dependencies. Apply this pattern to any large list mapping in the application to optimize main thread performance.
