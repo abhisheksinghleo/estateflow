@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect, Suspense, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import PropertyCard from "@/components/PropertyCard";
 import PropertyFilters from "@/components/PropertyFilters";
@@ -106,14 +106,22 @@ function RentPageContent() {
     setActiveFilters(null);
   };
 
-  const filtered = applyFilters(rentProperties || [], activeFilters);
-
-  const sorted = [...filtered].sort((a, b) => {
-    if (sort === "priceLowHigh") return a.price - b.price;
-    if (sort === "priceHighLow") return b.price - a.price;
-    if (sort === "beds") return b.beds - a.beds;
-    return 0; // newest — already ordered
-  });
+  /*
+   * ⚡ Bolt Performance Optimization
+   * What: Memoize filtering and sorting logic using useMemo.
+   * Why: Prevents expensive client-side array operations on every re-render.
+   * Impact: Reduces render time for large lists, preventing main thread blocking.
+   * Measurement: Profiler should show reduced time spent in RentPageContent component during re-renders.
+   */
+  const sorted = useMemo(() => {
+    const filtered = applyFilters(rentProperties || [], activeFilters);
+    return [...filtered].sort((a, b) => {
+      if (sort === "priceLowHigh") return a.price - b.price;
+      if (sort === "priceHighLow") return b.price - a.price;
+      if (sort === "beds") return b.beds - a.beds;
+      return 0; // newest — already ordered
+    });
+  }, [rentProperties, activeFilters, sort]);
 
   return (
     <section className="min-h-screen bg-surface">
