@@ -1,0 +1,3 @@
+## 2024-08-15 - Array Operations Optimization
+**Learning:** Found complex filtering, sorting, and mapping directly in the render path of `BuyPage`, `RentPage`, and `FeaturedProperties` without memoization, leading to unnecessary re-computations on unrelated state changes (e.g., sort selection or typing). This is a common React anti-pattern when dealing with larger datasets from an API.
+**Action:** Always wrap `filter()`, `sort()`, and `map()` chains in `useMemo` when handling arrays derived from state or API responses, and accurately pass dependencies to prevent needless O(n log n) overhead during renders.

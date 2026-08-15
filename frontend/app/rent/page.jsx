@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect, Suspense, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import PropertyCard from "@/components/PropertyCard";
 import PropertyFilters from "@/components/PropertyFilters";
@@ -106,14 +106,20 @@ function RentPageContent() {
     setActiveFilters(null);
   };
 
-  const filtered = applyFilters(rentProperties || [], activeFilters);
+  // 💡 What: Wrapped the filter and sort logic in useMemo.
+  // 🎯 Why: To prevent expensive O(n log n) array operations on every component re-render (e.g. when typing in a search bar or when layout shifts occur) unless the underlying data, active filters, or sort order actually change.
+  // 📊 Impact: Significantly reduces main thread blocking during frequent re-renders, improving responsiveness when interacting with UI elements on the page.
+  // 🔬 Measurement: Profile the page with React DevTools while toggling state (like an unrelated toggle); the "filtered" and "sorted" recalculation time will drop to near zero for subsequent renders.
+  const sorted = useMemo(() => {
+    const filtered = applyFilters(rentProperties || [], activeFilters);
 
-  const sorted = [...filtered].sort((a, b) => {
-    if (sort === "priceLowHigh") return a.price - b.price;
-    if (sort === "priceHighLow") return b.price - a.price;
-    if (sort === "beds") return b.beds - a.beds;
-    return 0; // newest — already ordered
-  });
+    return [...filtered].sort((a, b) => {
+      if (sort === "priceLowHigh") return a.price - b.price;
+      if (sort === "priceHighLow") return b.price - a.price;
+      if (sort === "beds") return b.beds - a.beds;
+      return 0; // newest — already ordered
+    });
+  }, [rentProperties, activeFilters, sort]);
 
   return (
     <section className="min-h-screen bg-surface">
