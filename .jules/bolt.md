@@ -1,0 +1,3 @@
+## 2026-08-16 - Memoize array filtering and sorting in Next.js/React components
+**Learning:** In Next.js App Router projects, complex client-side array operations (like filtering and sorting large property lists) inside functional components will execute on every single re-render if not memoized. This can lead to CPU spikes and laggy UI, especially if state updates unrelated to the filtering (like hover states or minor interactions) trigger re-renders.
+**Action:** Always wrap expensive client-side array processing (filtering, mapping, sorting) in a `useMemo` hook. Ensure the dependency array includes all variables that affect the computation (e.g., the raw data, active filters, and sort order) to prevent unnecessary re-execution.
