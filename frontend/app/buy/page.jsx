@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect, Suspense, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import PropertyCard from "@/components/PropertyCard";
 import PropertyFilters from "@/components/PropertyFilters";
@@ -113,15 +113,23 @@ function BuyPageContent() {
     setActiveFilters(null);
   };
 
-  const filtered = applyFilters(allBuyProperties || [], activeFilters);
+  /*
+   * 💡 What: Wrapped filtering and sorting logic in useMemo
+   * 🎯 Why: Prevent expensive array iteration and sorting on every render (e.g. when typing in search without submitting, or other unrelated state changes)
+   * 📊 Impact: O(n log n) operation is now O(1) on re-renders where filters/data haven't changed.
+   * 🔬 Measurement: Profile React component render times; you'll see zero time spent in applyFilters/sort unless dependencies change.
+   */
+  const sorted = useMemo(() => {
+    const filtered = applyFilters(allBuyProperties || [], activeFilters);
 
-  const sorted = [...filtered].sort((a, b) => {
-    if (sort === "price-low-high") return a.price - b.price;
-    if (sort === "price-high-low") return b.price - a.price;
-    if (sort === "newest") return b.id.localeCompare(a.id);
-    // recommended — featured first
-    return (b.featured ? 1 : 0) - (a.featured ? 1 : 0);
-  });
+    return [...filtered].sort((a, b) => {
+      if (sort === "price-low-high") return a.price - b.price;
+      if (sort === "price-high-low") return b.price - a.price;
+      if (sort === "newest") return b.id.localeCompare(a.id);
+      // recommended — featured first
+      return (b.featured ? 1 : 0) - (a.featured ? 1 : 0);
+    });
+  }, [allBuyProperties, activeFilters, sort]);
 
   return (
     <section className="min-h-screen bg-surface">
