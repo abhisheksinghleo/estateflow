@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect, Suspense, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import PropertyCard from "@/components/PropertyCard";
 import PropertyFilters from "@/components/PropertyFilters";
@@ -113,15 +113,34 @@ function BuyPageContent() {
     setActiveFilters(null);
   };
 
-  const filtered = applyFilters(allBuyProperties || [], activeFilters);
+  /*
+   * ⚡ Bolt Performance Optimization:
+   * What: Wrapped complex client-side array filtering in useMemo.
+   * Why: Prevents expensive re-evaluation of filters on every render (e.g. when typing in search bar or sorting).
+   * Impact: Reduces CPU blocking time and unnecessary array creations, improving page responsiveness.
+   * Measurement: Check React Profiler. Filter execution should only happen when allBuyProperties or activeFilters change.
+   */
+  const filtered = useMemo(
+    () => applyFilters(allBuyProperties || [], activeFilters),
+    [allBuyProperties, activeFilters]
+  );
 
-  const sorted = [...filtered].sort((a, b) => {
-    if (sort === "price-low-high") return a.price - b.price;
-    if (sort === "price-high-low") return b.price - a.price;
-    if (sort === "newest") return b.id.localeCompare(a.id);
-    // recommended — featured first
-    return (b.featured ? 1 : 0) - (a.featured ? 1 : 0);
-  });
+  /*
+   * ⚡ Bolt Performance Optimization:
+   * What: Wrapped array sorting in useMemo.
+   * Why: Prevents copying and re-sorting the array on every render.
+   * Impact: Saves CPU cycles, especially on large datasets.
+   * Measurement: Check React Profiler. Sorting should only run when filtered list or sort direction changes.
+   */
+  const sorted = useMemo(() => {
+    return [...filtered].sort((a, b) => {
+      if (sort === "price-low-high") return a.price - b.price;
+      if (sort === "price-high-low") return b.price - a.price;
+      if (sort === "newest") return b.id.localeCompare(a.id);
+      // recommended — featured first
+      return (b.featured ? 1 : 0) - (a.featured ? 1 : 0);
+    });
+  }, [filtered, sort]);
 
   return (
     <section className="min-h-screen bg-surface">

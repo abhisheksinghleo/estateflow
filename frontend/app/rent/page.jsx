@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect, Suspense, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import PropertyCard from "@/components/PropertyCard";
 import PropertyFilters from "@/components/PropertyFilters";
@@ -106,14 +106,33 @@ function RentPageContent() {
     setActiveFilters(null);
   };
 
-  const filtered = applyFilters(rentProperties || [], activeFilters);
+  /*
+   * ⚡ Bolt Performance Optimization:
+   * What: Wrapped complex client-side array filtering in useMemo.
+   * Why: Prevents expensive re-evaluation of filters on every render (e.g. when typing in search bar or sorting).
+   * Impact: Reduces CPU blocking time and unnecessary array creations, improving page responsiveness.
+   * Measurement: Check React Profiler. Filter execution should only happen when rentProperties or activeFilters change.
+   */
+  const filtered = useMemo(
+    () => applyFilters(rentProperties || [], activeFilters),
+    [rentProperties, activeFilters]
+  );
 
-  const sorted = [...filtered].sort((a, b) => {
-    if (sort === "priceLowHigh") return a.price - b.price;
-    if (sort === "priceHighLow") return b.price - a.price;
-    if (sort === "beds") return b.beds - a.beds;
-    return 0; // newest — already ordered
-  });
+  /*
+   * ⚡ Bolt Performance Optimization:
+   * What: Wrapped array sorting in useMemo.
+   * Why: Prevents copying and re-sorting the array on every render.
+   * Impact: Saves CPU cycles, especially on large datasets.
+   * Measurement: Check React Profiler. Sorting should only run when filtered list or sort direction changes.
+   */
+  const sorted = useMemo(() => {
+    return [...filtered].sort((a, b) => {
+      if (sort === "priceLowHigh") return a.price - b.price;
+      if (sort === "priceHighLow") return b.price - a.price;
+      if (sort === "beds") return b.beds - a.beds;
+      return 0; // newest — already ordered
+    });
+  }, [filtered, sort]);
 
   return (
     <section className="min-h-screen bg-surface">
